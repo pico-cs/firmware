@@ -46,4 +46,4 @@ Please see [firmware folder](https://github.com/stfnmllr/pico-cs/tree/main/firmw
 
 ## Licensing
 
-Copyright 2021-2022 Stefan Miller and pico-cs contributers. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/stfnmllr/pico-cs).
+Copyright 2021-2022 Stefan Miller and pico-cs contributers. Please see our [LICENSE](LICENSE.md) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/stfnmllr/pico-cs).
