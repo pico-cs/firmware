@@ -12,4 +12,3 @@ CTestTestfile.cmake
 _deps
 .vscode
 /build/*
-!/build/cs.uf2

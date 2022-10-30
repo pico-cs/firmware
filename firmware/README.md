@@ -3,7 +3,7 @@
 ## Quick Start
 
 - Connect the Raspberry Pi Pico to your PC via an USB cable
-- Download the latest UF2 pico-cs firmware (cs.uf2) from [build folder](https://github.com/stfnmllr/pico-cs/tree/main/firmware/build)
+- Download the latest UF2 pico-cs firmware [cs.uf2](https://github.com/stfnmllr/pico-cs/releases)
 - Install cs.uf2 to the Raspberry Pi Pico via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
 - Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
 - Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
