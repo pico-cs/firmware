@@ -81,7 +81,8 @@ void exe_config(exe_t *exe, channel_in_t *in) {
         break;
 
     case CHANNEL_CMD_SET_DCC_SYNC_BITS:
-        dcc_set_sync_bits(&exe->dcc, in->dcc_sync_bits);
+        out.dcc_sync_bits = dcc_set_sync_bits(&exe->dcc, in->dcc_sync_bits);
+        channel_add_blocking_qout(exe->channel, &out);
         break;
 
     case CHANNEL_CMD_GET_ENABLED:

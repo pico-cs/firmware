@@ -7,8 +7,8 @@ static const int DCC_MAX_LOCO_ADDR     = 10239;
 static const int DCC_MAX_LOCO_SPEED128 =   127;
 static const int DCC_MAX_CV_DIRECT     =  1024;
 
-static const int DCC_MIN_SYNC_BITS = 17;
-static const int DCC_MAX_SYNC_BITS = 32;
+static const uint DCC_MIN_SYNC_BITS = 17;
+static const uint DCC_MAX_SYNC_BITS = 32;
 
 static const uint DCC_DEFAULT_SYNC_BITS = DCC_MIN_SYNC_BITS;
 
@@ -152,7 +152,7 @@ uint dcc_get_sync_bits(dcc_t *dcc) {
     return dcc->sync_bits;
 };
 
-void dcc_set_sync_bits(dcc_t *dcc, uint sync_bits) {
+uint dcc_set_sync_bits(dcc_t *dcc, uint sync_bits) {
     if (sync_bits < DCC_MIN_SYNC_BITS) {
         dcc->sync_bits = DCC_MIN_SYNC_BITS;
     } else if (sync_bits > DCC_MAX_SYNC_BITS) {
@@ -160,6 +160,7 @@ void dcc_set_sync_bits(dcc_t *dcc, uint sync_bits) {
     } else {
         dcc->sync_bits = sync_bits;
     }
+    return dcc->sync_bits;
 }
 
 void dcc_reset(dcc_t *dcc) {

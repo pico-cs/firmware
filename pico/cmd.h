@@ -39,7 +39,7 @@ static const char* cmd_rvs[CMD_MAX_RV] = {
 	"invcmd",        // invalid command
 	"invprm",        // invalid parameter
 	"invnumprm",     // invalid number of parameters
-    "nodata",        // no data available
+	"nodata",        // no data available
 	"nochange",      // data not changed by command
 	"invgpio",       // currently not used
 	"rsrvgpio",      // currently not used
@@ -52,7 +52,7 @@ typedef enum {
 	CMD_RC_INVCMD      = 1,
 	CMD_RC_INVPRM      = 2,
 	CMD_RC_INVNUMPRM   = 3,
-    CMD_RC_NODATA      = 4,
+	CMD_RC_NODATA      = 4,
 	CMD_RC_NOCHANGE    = 5,
 	CMD_RC_INVGPIO_X   = 6, // currently not used 
 	CMD_RC_RSRVGPIO_X  = 7, // currently not used
@@ -75,12 +75,12 @@ typedef struct {
  } cmd_command_entry_t;
  
 static const cmd_command_entry_t cmd_commands[CMD_MAX_COMMAND] = {
-	{"h",         "",                       "help"},
+	{"h",         NULL,                     "help"},
 	{"cl",        "[t|f]",                  "led"},
-    {"ct",        "",                       "temperature"},
-    {"cs",        "[<bits>]",               "DCC sync bits"},
+	{"ct",        NULL,                     "temperature"},
+	{"cs",        "[<bits>]",               "DCC sync bits"},
 	{"ce",        "[t|f]",                  "enabled"},
-	{"cr",        "",                       "refresh buffer"},
+	{"cr",        NULL,                     "refresh buffer"},
 	{"cd",        "<addr>",                 "delete loco from refresh buffer"},
 	{"ld",        "<addr> [t|f|~]",         "loco direction"},
 	{"ls",        "<addr> [<speed128]",     "loco speed"},
@@ -100,8 +100,8 @@ typedef enum {
     CMD_COMMAND_NOP            =  0,
 	CMD_COMMAND_HELP           =  1,
 	CMD_COMMAND_LED            =  2,
-    CMD_COMMAND_TEMP           =  3,
-    CMD_COMMAND_DCC_SYNC_BITS  =  4,
+	CMD_COMMAND_TEMP           =  3,
+	CMD_COMMAND_DCC_SYNC_BITS  =  4,
 	CMD_COMMAND_ENABLED        =  5,
 	CMD_COMMAND_RBUF           =  6,
 	CMD_COMMAND_DEL_LOCO       =  7,
@@ -125,10 +125,10 @@ typedef enum {
 } cmd_flag_t;
 
 typedef struct {
-    rbuf_t *rbuf;
-    channel_t *channel;
-    byte buf[CMD_BUFFER_SIZE];
-    int pos; // position in buf
+	rbuf_t *rbuf;
+	channel_t *channel;
+	byte buf[CMD_BUFFER_SIZE];
+	int pos; // position in buf
 	byte flags; 
 } cmd_t; // command
 

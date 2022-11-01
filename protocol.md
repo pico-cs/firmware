@@ -1,39 +1,23 @@
-# Firmware
-
-## Quick Start
-
-- Connect the Raspberry Pi Pico to your PC via an USB cable
-- Download the latest UF2 pico-cs firmware [cs.uf2](https://github.com/stfnmllr/pico-cs/releases)
-- Install cs.uf2 to the Raspberry Pi Pico via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
-- Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
-- Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
-- Raspberry Pi Pico DCC signal output is on GP2
-
-## Build
-
-To build the firmware the Raspberry Pi Pico C/C++ SDK and toolchain needs to be installed. For details please consult the [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html).
-
-
-## Protocol
+# Protocol
 
 !!! The protocol is subject to be extended and/or changed until a stable v1.0 version of the firmware would be available !!!
 
-For communication with the Raspberry PI Pico a simple human readable text protocol and message framing is used. Each command (request) message starts with an '+' and ends with \<CR\>'. For each command a response is send consisting of one or more messages. Each response message starts with one of the following characters and ends with \<CR\>':
+For communication with the Raspberry PI Pico a simple human readable text protocol and message framing is used. Each command message starts with an '+' and ends with \<CR\>'. For each command a reply is send consisting of one or more messages. Each reply message starts with one of the following characters and ends with \<CR\>':
 
-- '=' (command successful - singe message response)
+- '=' (command successful - single message reply)
 - '?' (command not successful - followed by error)
-- '-' (command successful - multi message response)
-- '.' (end message in case of multi message response)
+- '-' (command successful - multi message reply)
+- '.' (end message in case of multi message reply)
 - '!' (push message)
 
-The protocol is not strictly request response based as the command station might send push messages at any time. But it is guaranteed that responses are send in request order and that push messages are not send in between multi message responses.
+The protocol is not strictly command->reply based as the command station might send push messages at any time. But it is guaranteed that replies are send in command order and that push messages are not send in between multi message replies.
 
 ### Currently the following commands are supported:
 
    ***
 #### h
 
-    Returns a multi message help response.
+    Returns a multi message help reply.
 
    ***
 #### cl [t|f]
@@ -125,9 +109,9 @@ The protocol is not strictly request response based as the command station might
 
 ### Examples
 
-The following examples demonstrate the usage of the text protocol. For each example the first block shows the command request message (please remember to start each commend with '+') and the second block shows the response.
+The following examples demonstrate the usage of the text protocol. For each example the first block shows the command message (please remember to start each commend with '+') and the second block shows the reply.
 
-Each command needs to be ended with a \<CR\> and each response message does end with a \<CR\> as well. For better readability the \<CR\> is not shown.
+Each command needs to be ended with a \<CR\> and each reply message does end with a \<CR\> as well. For better readability the \<CR\> is not shown.
 
 - read temperature
     ```

@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: pico-cs
+Upstream-Name: firmware
 Upstream-Contact: stefan.miller_at_sap.com
-Source: https://github.com/stfnmllr/pico-cs
+Source: https://github.com/pico-cs/firmware
 
 Files: *
 Copyright: 2021-2022 Stefan Miller

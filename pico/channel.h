@@ -89,7 +89,7 @@ typedef struct {
 void channel_init(channel_t *channel);
 
 uint channel_get_dcc_sync_bits(channel_t *channel);
-void channel_set_dcc_sync_bits(channel_t *channel, uint sync_bits);
+uint channel_set_dcc_sync_bits(channel_t *channel, uint sync_bits);
 bool channel_get_enabled(channel_t *channel);
 void channel_set_enabled(channel_t *channel, bool enabled);
 

@@ -60,7 +60,11 @@ static void cmd_write_rbuf_entry(int idx, volatile rbuf_entry_t *entry) {
 
 static void cmd_write_help() {
     for (int i = 0; i < CMD_MAX_COMMAND; i++) {
-        printf("%c%c%s %s (%s)\n", cmd_tag_multi, cmd_tag_start, cmd_commands[i].command, cmd_commands[i].syntax, cmd_commands[i].help);
+        if (cmd_commands[i].syntax == NULL) {
+            printf("%c%s (%s)\n", cmd_tag_multi, cmd_commands[i].command, cmd_commands[i].help);
+        } else {
+            printf("%c%s %s (%s)\n", cmd_tag_multi, cmd_commands[i].command, cmd_commands[i].syntax, cmd_commands[i].help);
+        }
     }
     cmd_write_eor();
 }
@@ -289,7 +293,7 @@ static cmd_rc_t cmd_dcc_sync_bits(cmd_t *cmd, int num_prm) {
         break;
     case 2:
         if (!cmd_parse_uint(cmd_prm(cmd, 1), &sync_bits)) return CMD_RC_INVPRM;
-        channel_set_dcc_sync_bits(cmd->channel, sync_bits);
+        sync_bits = channel_set_dcc_sync_bits(cmd->channel, sync_bits);
         break;
     }
     cmd_write_uint(sync_bits);

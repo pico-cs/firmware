@@ -15,10 +15,12 @@ uint channel_get_dcc_sync_bits(channel_t *channel) {
     return channel->out.dcc_sync_bits;
 };
 
-void channel_set_dcc_sync_bits(channel_t *channel, uint sync_bits) {
+uint channel_set_dcc_sync_bits(channel_t *channel, uint sync_bits) {
     channel->in.cmd = CHANNEL_CMD_SET_DCC_SYNC_BITS;
     channel->in.dcc_sync_bits = sync_bits;
     queue_add_blocking(&channel->qin, &channel->in);
+    queue_remove_blocking(&channel->qout, &channel->out);
+    return channel->out.dcc_sync_bits;
 };
 
 bool channel_get_enabled(channel_t *channel) {

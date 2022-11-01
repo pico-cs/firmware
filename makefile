@@ -1,16 +1,16 @@
 # builds and checks project
 all:
 	@echo "build and test"
-	cd firmware/build; cmake ..; make
+	cd pico/build; make
 	@echo "reuse (license) check"
 	reuse lint
 
 # rebuild
 rebuild:
 	@echo "rebuild"
-	rm -rf firmware/build
-	mkdir firmware/build
-	cd firmware/build; cmake ..; make
+	rm -rf pico/build
+	mkdir pico/build
+	cd pico/build; cmake ..; make
 
 #install fsfe reuse tool (https://git.fsfe.org/reuse/tool)
 # pre-conditions:

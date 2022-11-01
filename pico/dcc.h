@@ -26,7 +26,7 @@ bool dcc_check_cv(byte cv);
 bool dcc_check_bit(byte bit); 
 
 void dcc_init(dcc_t *dcc, putter fct, PIO pio, uint sm);
-void dcc_set_sync_bits(dcc_t *dcc, uint sync_bits);
+uint dcc_set_sync_bits(dcc_t *dcc, uint sync_bits);
 uint dcc_get_sync_bits(dcc_t *dcc);
 void dcc_reset(dcc_t *dcc);
 void dcc_idle(dcc_t *dcc);
