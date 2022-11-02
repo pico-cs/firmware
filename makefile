@@ -10,7 +10,7 @@ rebuild:
 	@echo "rebuild"
 	rm -rf pico/build
 	mkdir pico/build
-	cd pico/build; cmake ..; make
+	cd pico/build; cmake .. -DPICO_BOARD=pico_w; make
 
 #install fsfe reuse tool (https://git.fsfe.org/reuse/tool)
 # pre-conditions:

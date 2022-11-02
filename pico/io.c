@@ -30,24 +30,13 @@ static byte gp[IO_NUM] = {
     IO_PIN_RESERVED,              // GPIO22
     IO_PIN_RESERVED,              // GPIO23
     IO_PIN_RESERVED,              // GPIO24
-    IO_PIN_RESERVED | IO_PIN_OUT, // GPIO25 (on board LED)
+    IO_PIN_RESERVED | IO_PIN_OUT, // GPIO25 (on board LED - pico only)
     IO_PIN_RESERVED,              // GPIO26
     IO_PIN_RESERVED,              // GPIO27
     IO_PIN_RESERVED,              // GPIO28
 };
 
-void io_init() {
-    gpio_init(IO_LED_PIN);
-    gpio_set_dir(IO_LED_PIN, GPIO_OUT);
-}
-
-void io_set_led(bool v) {
-    gpio_put(IO_LED_PIN, v ? 1 : 0);
-}
-
-bool io_get_led() {
-    return gpio_get(IO_LED_PIN) == 1;
-}
+void io_init() {}
 
 io_error_t io_init_out(uint no) {
     if (no >= IO_NUM) return IO_INV;

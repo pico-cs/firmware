@@ -4,6 +4,7 @@
 #include "hardware/adc.h"
 
 #include "cmd.h"
+#include "board.h"
 #include "io.h"
 #include "exe.h"
 
@@ -67,6 +68,18 @@ static void cmd_write_help() {
         }
     }
     cmd_write_eor();
+}
+
+static void cmd_write_board(cmd_t *cmd) {
+    switch (cmd->board->type) {
+    case BOARD_TYPE_PICO:   printf("%cpico",   cmd_tag_success); break;
+    case BOARD_TYPE_PICO_W: printf("%cpico_w", cmd_tag_success); break;
+    }
+
+    for (int i = 0; i < PICO_UNIQUE_BOARD_ID_SIZE_BYTES; ++i) {
+        printf(" %02x", cmd->board->board_id.id[i]);
+    }
+    printf("\n");
 }
 
 static bool cmd_parse_uint(char *ptr, uint *v) {
@@ -235,10 +248,11 @@ inline static bool cmd_get_flag(cmd_t *cmd, byte flag) {return ((cmd->flags & fl
 
 inline static void cmd_set_led(cmd_t *cmd) {
     // io_get_led();
-    io_set_led(cmd_get_flag(cmd, CMD_FLAG_ENABLED) && cmd_get_flag(cmd, CMD_FLAG_LED));
+    board_set_led(cmd->board, cmd_get_flag(cmd, CMD_FLAG_ENABLED) && cmd_get_flag(cmd, CMD_FLAG_LED));
 }
 
-void cmd_init(cmd_t *cmd, rbuf_t *rbuf, channel_t *channel) {
+void cmd_init(cmd_t *cmd, board_t *board, rbuf_t *rbuf, channel_t *channel) {
+    cmd->board = board;
     cmd->rbuf = rbuf;
     cmd->channel = channel;
     channel_set_enabled(cmd->channel, false);   // start disabled
@@ -247,9 +261,16 @@ void cmd_init(cmd_t *cmd, rbuf_t *rbuf, channel_t *channel) {
 }
 
 static cmd_rc_t cmd_help(cmd_t *cmd, int num_prm) {
-    if (!cmd_check_num_prm(num_prm, 1, 2)) return CMD_RC_INVNUMPRM;
+    if (!cmd_check_num_prm(num_prm, 1, 1)) return CMD_RC_INVNUMPRM;
 
     cmd_write_help();
+    return CMD_RC_OK;
+}
+
+static cmd_rc_t cmd_board(cmd_t *cmd, int num_prm) {
+    if (!cmd_check_num_prm(num_prm, 1, 1)) return CMD_RC_INVNUMPRM;
+
+    cmd_write_board(cmd);
     return CMD_RC_OK;
 }
 
@@ -558,6 +579,7 @@ void cmd_dispatch(cmd_t *cmd) {
     switch (cmd_find_command(cmd_prm(cmd, 0))) {
     case CMD_COMMAND_NOP:            rc = CMD_RC_INVCMD;                    break;
     case CMD_COMMAND_HELP:           rc = cmd_help(cmd, num_prm);           break;
+    case CMD_COMMAND_BOARD:          rc = cmd_board(cmd, num_prm);          break;
     case CMD_COMMAND_LED:            rc = cmd_led(cmd, num_prm);            break;
     case CMD_COMMAND_TEMP:           rc = cmd_temp(cmd, num_prm);           break;
     case CMD_COMMAND_DCC_SYNC_BITS:  rc = cmd_dcc_sync_bits(cmd, num_prm);  break;

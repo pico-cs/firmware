@@ -4,11 +4,12 @@
 #include "pico/stdlib.h"
 
 #include "common.h"
+#include "board.h"
 #include "rbuf.h"
 #include "channel.h"
 
 #define CMD_BUFFER_SIZE 255
-#define CMD_MAX_COMMAND 15
+#define CMD_MAX_COMMAND 16
 #define CMD_MAX_RV 10
 
 static const char cmd_tag_start     = '+';
@@ -76,6 +77,7 @@ typedef struct {
  
 static const cmd_command_entry_t cmd_commands[CMD_MAX_COMMAND] = {
 	{"h",         NULL,                     "help"},
+	{"b",         NULL,                     "board info"},
 	{"cl",        "[t|f]",                  "led"},
 	{"ct",        NULL,                     "temperature"},
 	{"cs",        "[<bits>]",               "DCC sync bits"},
@@ -99,20 +101,21 @@ Switch: {cmdSwitch, groupOn, cs.switch_, "<no> <init|on|off>", "switch init or s
 typedef enum { 
     CMD_COMMAND_NOP            =  0,
 	CMD_COMMAND_HELP           =  1,
-	CMD_COMMAND_LED            =  2,
-	CMD_COMMAND_TEMP           =  3,
-	CMD_COMMAND_DCC_SYNC_BITS  =  4,
-	CMD_COMMAND_ENABLED        =  5,
-	CMD_COMMAND_RBUF           =  6,
-	CMD_COMMAND_DEL_LOCO       =  7,
-	CMD_COMMAND_LOCO_DIR       =  8,
-	CMD_COMMAND_LOCO_SPEED128  =  9,
-	CMD_COMMAND_LOCO_FCT       = 10,
-	CMD_COMMAND_LOCO_CV_BYTE   = 11,
-	CMD_COMMAND_LOCO_CV_BIT    = 12,
-	CMD_COMMAND_LOCO_CV29_BIT5 = 13,
-	CMD_COMMAND_LOCO_LADDR     = 14,
-	CMD_COMMAND_LOCO_CV1718    = 15,
+	CMD_COMMAND_BOARD          =  2,
+	CMD_COMMAND_LED            =  3,
+	CMD_COMMAND_TEMP           =  4,
+	CMD_COMMAND_DCC_SYNC_BITS  =  5,
+	CMD_COMMAND_ENABLED        =  6,
+	CMD_COMMAND_RBUF           =  7,
+	CMD_COMMAND_DEL_LOCO       =  8,
+	CMD_COMMAND_LOCO_DIR       =  9,
+	CMD_COMMAND_LOCO_SPEED128  = 10,
+	CMD_COMMAND_LOCO_FCT       = 11,
+	CMD_COMMAND_LOCO_CV_BYTE   = 12,
+	CMD_COMMAND_LOCO_CV_BIT    = 13,
+	CMD_COMMAND_LOCO_CV29_BIT5 = 14,
+	CMD_COMMAND_LOCO_LADDR     = 15,
+	CMD_COMMAND_LOCO_CV1718    = 16,
 } cmd_command_t;
 
 /*
@@ -125,6 +128,7 @@ typedef enum {
 } cmd_flag_t;
 
 typedef struct {
+	board_t *board;
 	rbuf_t *rbuf;
 	channel_t *channel;
 	byte buf[CMD_BUFFER_SIZE];
@@ -133,7 +137,7 @@ typedef struct {
 } cmd_t; // command
 
 // public interface
-void cmd_init(cmd_t *cmd, rbuf_t *rb, channel_t *channel);
+void cmd_init(cmd_t *cmd, board_t *board, rbuf_t *rb, channel_t *channel);
 void cmd_dispatch(cmd_t *cmd);
 
 #endif

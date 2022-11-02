@@ -5,8 +5,6 @@
 
 #define IO_NUM 29  // number of general purpose io (gpio0 - gpio28)
 
-#define IO_LED_PIN 25
-
 typedef enum { 
     IO_OK    = 0, // ok
     IO_INV   = 1, // invalid gpio number
@@ -16,8 +14,6 @@ typedef enum {
 
 // public interface
 void io_init();
-void io_set_led(bool v);
-bool io_get_led();
 io_error_t io_init_out(uint no);
 io_error_t io_set_gp(uint no, bool v);
 

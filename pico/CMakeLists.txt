@@ -11,6 +11,7 @@ pico_sdk_init()
 
 add_executable(cs
     cs.c
+    board.c
     io.c
     cmd.c
     exe.c
@@ -27,6 +28,7 @@ pico_enable_stdio_uart(cs 1)
 pico_add_extra_outputs(cs)
 target_link_libraries(cs
     pico_stdlib
+    pico_cyw43_arch_none     # we need Wifi to access the GPIO, but we don't need anything else
     pico_multicore
     pico_sync
     hardware_pio

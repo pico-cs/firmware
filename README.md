@@ -1,4 +1,4 @@
-# pico-cs
+# pico-cs firmware
 
 [![REUSE status](https://api.reuse.software/badge/github.com/pico-cs/firmware)](https://api.reuse.software/info/github.com/pico-cs/firmware)
 
@@ -16,7 +16,7 @@ pico-cs is intended for skilled users with expert levels of model railway electr
 
 ## Hardware
 
-- Raspberry Pi Pico / Pico H
+- Raspberry Pi Pico / Pico W
 - A PC, Laptop, Raspberry Pi or any suitable device with an USB interface to flash the firmware and operate the command station via serial over USB
 - A model railway booster
 - A model railroad locomotive roller test stand
@@ -68,7 +68,7 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 
 ## Outlook
 
-- Pico W support 
+- Pico W network connection 
 
 ## Licensing
 

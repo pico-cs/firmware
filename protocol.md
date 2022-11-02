@@ -20,6 +20,11 @@ The protocol is not strictly command->reply based as the command station might s
     Returns a multi message help reply.
 
    ***
+#### b
+
+    Returns board information.
+
+   ***
 #### cl [t|f]
     
     Returns or sets the value for the internal Pico led where
