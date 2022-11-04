@@ -64,7 +64,7 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 - Simple command human readable and debug friendly text protocol
   - which can be used directly via serial terminal programs supporting serial over USB
   - and easily integrated into any programming language or tool supporting serial over USB communication
-- [Go](https://go.dev/) client library
+- [client library](https://github.com/pico-cs/go-client) written in [Go](https://go.dev/)
 
 ## Outlook
 
@@ -72,4 +72,4 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 
 ## Licensing
 
-Copyright 2021-2022 Stefan Miller and pico-cs contributers. Please see our [LICENSE](LICENSE.md) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/stfnmllr/pico-cs).
+Copyright 2021-2022 Stefan Miller and pico-cs contributers. Please see our [LICENSE](LICENSE.md) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/pico-cs/firmware).
