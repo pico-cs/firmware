@@ -64,7 +64,7 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 - Simple command human readable and debug friendly text protocol
   - which can be used directly via serial terminal programs supporting serial over USB
   - and easily integrated into any programming language or tool supporting serial over USB communication
-- [client library](https://github.com/pico-cs/go-client) written in [Go](https://go.dev/)
+- [Client library](https://github.com/pico-cs/go-client) written in [Go](https://go.dev/)
 
 ## Outlook
 
