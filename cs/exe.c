@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "pico/binary_info.h"
 
 #include "exe.h"
 
@@ -59,6 +60,8 @@ static void exe_put(PIO pio, uint sm, word w) {
 }
 
 void exe_init(exe_t *exe, rbuf_t *rbuf, channel_t *channel) {
+    bi_decl(bi_1pin_with_name(EXE_DEFAULT_PIN_TX, "DCC signal output"));
+
     exe->enabled = true;
     exe->rbuf = rbuf;
     exe->channel = channel;

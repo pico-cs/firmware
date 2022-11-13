@@ -6,7 +6,7 @@
 
 ; http://normen.railcommunity.de/RCN-210.pdf
 
-; state machine frequenz: 500 000 HZ (2us per instruction):
+; state machine frequency: 500 000 HZ (2us per instruction):
 ; ->  58us signal equals 29 instructions
 ; -> 100us signal equals 50 instructions
 
@@ -24,7 +24,7 @@ long:                       ;
 % c-sdk {
 #include "hardware/clocks.h"
 
-static const uint64_t freq = 500000; // state machine frequenz: 500 000 HZ (2us per instruction)
+static const uint64_t freq = 500000; // state machine frequency: 500 000 HZ (2us per instruction)
 
 static inline void dcc_tx_program_init(PIO pio, uint sm, uint offset, uint pin_tx) {
     pio_gpio_init(pio, pin_tx);

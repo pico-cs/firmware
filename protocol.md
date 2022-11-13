@@ -22,7 +22,10 @@ The protocol is not strictly command->reply based as the command station might s
    ***
 #### b
 
-    Returns board information.
+    Returns board information:
+    - 'pico' | 'pico_w' dependent on board
+    - unique board id
+    - mac address (pico_w only) 
 
    ***
 #### cl [t|f]

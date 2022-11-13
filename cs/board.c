@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include "hardware/adc.h"
 
-#include "pico/cyw43_arch.h"
-
 #include "board.h"
 
-board_type_t board_get_type() {
+static board_type_t board_get_type() {
     // adc_init(); // already done
     adc_gpio_init(29);
     adc_select_input(3);
@@ -28,39 +26,19 @@ board_type_t board_get_type() {
     */
 }
 
-bool board_init(board_t *board) {
+void board_init_common(board_t *board, writer_t *writer) {
+    board->writer = writer;
+
     adc_init();                        // configure adc
     adc_set_temp_sensor_enabled(true); // enable temperature sensor
 
-    pico_get_unique_board_id(&board->board_id);
+    // unique board id    
+    pico_unique_board_id_t board_id;
+    pico_get_unique_board_id(&board_id);
+    uint8_hex_to_string(board_id.id, PICO_UNIQUE_BOARD_ID_SIZE_BYTES, board->id, '-');
+
+    // get real board type
     board->type = board_get_type();
-
-    switch (board->type) {
-    case BOARD_TYPE_PICO:
-        // init pico gpio led
-        gpio_init(BOARD_GPIO_LED_PIN);
-        gpio_set_dir(BOARD_GPIO_LED_PIN, GPIO_OUT);
-        break;
-    case BOARD_TYPE_PICO_W:
-        if (cyw43_arch_init()) {
-            printf("WiFi init failed");
-            return false;
-        }
-        break;
-    }
-    return true;
-}
-
-void board_set_led(board_t *board, bool v) {
-    switch (board->type) {
-        case BOARD_TYPE_PICO:   gpio_put(BOARD_GPIO_LED_PIN, v ? 1 : 0);               break;
-        case BOARD_TYPE_PICO_W: cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, v ? 1 : 0); break;
-    }
-}
-
-bool board_get_led(board_t *board) {
-    switch (board->type) {
-        case BOARD_TYPE_PICO:   return gpio_get(BOARD_GPIO_LED_PIN)               == 1; break;
-        case BOARD_TYPE_PICO_W: return cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN) == 1; break;
-    }
+    // clear mac
+    board->mac[0] = 0;
 }

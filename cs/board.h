@@ -4,21 +4,27 @@
 #include "pico/unique_id.h"
 
 #include "common.h"
-
-#define BOARD_GPIO_LED_PIN 25
+#include "prot.h"
 
 typedef enum { 
-    BOARD_TYPE_PICO   = 0, // pico board
-    BOARD_TYPE_PICO_W = 1, // pico w board
+    BOARD_TYPE_PICO   = 1, // pico board
+    BOARD_TYPE_PICO_W = 2, // pico w board
 } board_type_t;
 
+#define MAC_SIZE_BYTES 6
+
 typedef struct {
+    writer_t *writer;
     board_type_t type;
-    pico_unique_board_id_t board_id;
+    char id[PICO_UNIQUE_BOARD_ID_SIZE_BYTES*3];
+    char mac[MAC_SIZE_BYTES*3]; // wifi station mac address (empty in case of pico)
 } board_t;
 
 // public interface
-bool board_init();
+void board_init_common(board_t *board, writer_t *writer);
+
+bool board_init(board_t *board, writer_t *writer);
+void board_deinit(board_t *board);
 void board_set_led(board_t *board, bool v);
 bool board_get_led(board_t *board);
 

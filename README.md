@@ -43,8 +43,8 @@ To mitigate some of the function setting issues the pico-cs command station is o
 ## Quick Start
 
 - Connect the Raspberry Pi Pico to your PC via an USB cable
-- Download the latest UF2 pico-cs firmware [cs.uf2](https://github.com/pico-cs/firmware/releases)
-- Install cs.uf2 to the Raspberry Pi Pico via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
+- [Build](#build) the pico-cs firmware
+- Install firmware (Pico: cs.uf2, Pico w: cs_w.uf2) to the Raspberry Pi Pico via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
 - Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
 - Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
 - Raspberry Pi Pico DCC signal output is on GP2
@@ -53,6 +53,97 @@ To mitigate some of the function setting issues the pico-cs command station is o
 
 To build the firmware the Raspberry Pi Pico C/C++ SDK and toolchain needs to be installed. For details please consult the [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html).
 
+As the binary for the Pico W including the WiFi and network capabilities is significant larger and the WiFi SSID and a WiFi password is needed two firmware versions are build:
+
+```
+git clone https://github.com/pico-cs/firmware.git
+cd firmware/cs
+```
+
+Pico:
+
+```
+mkdir pico_build
+cd pico_build
+cmake .. -DPICO_BOARD=pico
+make
+```
+- firmware: cs.uf2 
+
+Pico W:
+```
+export PICO_CS_WIFI_SSID="MyWifiName"
+export PICO_CS_WIFI_PASSWORD="MyPassword"
+export PICO_CS_TCP_PORT= 4242
+mkdir pico_w_build
+cd pico_w_build
+cmake .. -DPICO_BOARD=pico_w
+make
+```
+- if the TCP_PORT environment varible (PICO_CS_TCP_PORT) is not set the default port 4242 is used.
+- firmware: cs_w.uf2 
+
+With the help of the [picotool](https://github.com/raspberrypi/picotool) the firmware binaries can be expected:
+```
+./picotool info -a <path to firmware>/firmware/cs/pico_build/cs.uf2 
+
+File <path to firmware>/firmware/cs/pico_build/cs.uf2:
+
+Program Information
+ name:          cs
+ version:       v0.1.9
+ web site:      https://github.com/pico-cs
+ description:   pico-cs DCC command station
+ features:      double reset -> BOOTSEL
+                UART stdin / stdout
+                USB stdin / stdout
+ binary start:  0x10000000
+ binary end:    0x1000cf2c
+
+Fixed Pin Information
+ 0:   UART0 TX
+ 1:   UART0 RX
+ 2:   DCC signal output
+ 25:  On-board LED
+
+Build Information
+ sdk version:       1.4.0
+ pico_board:        pico
+ boot2_name:        boot2_w25q080
+ build date:        Nov 13 2022
+ build attributes:  Release
+```
+
+```
+./picotool info -a <path to firmware>/firmware/cs/pico_w_build/cs_w.uf2
+
+File ../../pico-cs/firmware/cs/pico_w_build/cs_w.uf2:
+
+Program Information
+ name:          cs_w
+ version:       v0.1.9
+ web site:      https://github.com/pico-cs
+ description:   pico-cs DCC command station
+ features:      WiFi SSID MyWifiName password MyPassword
+                TCP port 4242
+                double reset -> BOOTSEL
+                UART stdin / stdout
+                USB stdin / stdout
+ binary start:  0x10000000
+ binary end:    0x100536dc
+
+Fixed Pin Information
+ 0:  CYW43 LED, UART0 TX
+ 1:  UART0 RX
+ 2:  DCC signal output
+
+Build Information
+ sdk version:       1.4.0
+ pico_board:        pico_w
+ boot2_name:        boot2_w25q080
+ build date:        Nov 13 2022
+ build attributes:  Release
+```
 
 ## Protocol
 
@@ -69,7 +160,7 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 
 ## Outlook
 
-- Pico W network connection 
+- Pico W TCP/IP server network connection 
 
 ## Licensing
 

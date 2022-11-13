@@ -1,39 +1,14 @@
 #ifndef _CMD_H
 #define _CMD_H
 
-#include "pico/stdlib.h"
-
 #include "common.h"
 #include "board.h"
 #include "rbuf.h"
 #include "channel.h"
+#include "prot.h"
 
-#define CMD_BUFFER_SIZE 255
 #define CMD_MAX_COMMAND 16
-#define CMD_MAX_RV 10
-
-static const char cmd_tag_start     = '+';
-static const char cmd_tag_success   = '=';
-static const char cmd_tag_nosuccess = '?';
-static const char cmd_tag_multi     = '-';
-static const char cmd_tag_eor       = '.';
-static const char cmd_tag_push      = '!';
-
-static const char cmd_char_cr    = '\r';
-static const char cmd_char_nl    = '\n';
-static const char cmd_char_null  = '\0';
-static const char cmd_char_quote = '"';
-static const char cmd_char_space = ' ';
-
-static const char cmd_char_true   = 't';
-static const char cmd_char_false  = 'f';
-static const char cmd_char_toggle = '~';
-
-typedef enum{
-	CMD_TERNARY_FALSE  = 0,
-	CMD_TERNARY_TRUE   = 1,
-	CMD_TERNARY_TOGGLE = 2,
-} cmd_ternary_t;
+#define CMD_MAX_RV      10
 
 static const char* cmd_rvs[CMD_MAX_RV] = {
 	"ok",
@@ -61,19 +36,11 @@ typedef enum {
 	CMD_RC_NOTIMPL     = 9,
 } cmd_rc_t;
 
-typedef enum {
-    CMD_TOKEN_START      = 0,
-    CMD_TOKEN_END        = 1,
-    CMD_TOKEN_STRING     = 2,
-    CMD_TOKEN_WHITESPACE = 3,
-    CMD_TOKEN_CHAR       = 4,
-} cmd_token_t;
-
 typedef struct {
 	const char *command;
 	const char *syntax;
 	const char *help;
- } cmd_command_entry_t;
+} cmd_command_entry_t;
  
 static const cmd_command_entry_t cmd_commands[CMD_MAX_COMMAND] = {
 	{"h",         NULL,                     "help"},
@@ -131,13 +98,11 @@ typedef struct {
 	board_t *board;
 	rbuf_t *rbuf;
 	channel_t *channel;
-	byte buf[CMD_BUFFER_SIZE];
-	int pos; // position in buf
 	byte flags; 
 } cmd_t; // command
 
 // public interface
 void cmd_init(cmd_t *cmd, board_t *board, rbuf_t *rb, channel_t *channel);
-void cmd_dispatch(cmd_t *cmd);
+void cmd_dispatch(cmd_t *cmd, reader_t *reader, writer_t *writer);
 
 #endif
