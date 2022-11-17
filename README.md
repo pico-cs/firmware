@@ -6,18 +6,19 @@ pico-cs is a proof-of-concept for a model railway command station talking DCC (D
 
 pico-cs is intended for skilled users with expert levels of model railway electronics and protocol knowledge.
 
-## Why Raspberry Pi Pico
+## Why Raspberry Pi Pico / Pico W
 
 - Its support of programmable IO (PIO) enables implementing the core DCC protocol within a few lines of assembler code
 - Due to its dual cores the DCC signal generation and the command interface are implemented using different cores being run in parallel
 - Its small form factor and cost effectiveness allows and supports multiple command stations to be used as part of the model railroad layout
 - Its great ducumentation 
+- The Pico W WiFi capabilities to operate the command station remotely via a TCP/IP connection
 - And last but not least the fun using it
 
 ## Hardware
 
 - Raspberry Pi Pico / Pico W
-- A PC, Laptop, Raspberry Pi or any suitable device with an USB interface to flash the firmware and operate the command station via serial over USB
+- A PC, Laptop, Raspberry Pi or any suitable device with an USB interface to flash the firmware and operate the command station via serial over USB and / or WiFi
 - A model railway booster
 - A model railroad locomotive roller test stand
 - A DCC decoder equiped test locomotive
@@ -29,6 +30,9 @@ As there is a lot of booster alternatives (motor shield, H-bridge, commercial bo
 Voltage levels:
 - Pico DCC signal output is on GP2 with 3.3V level
 - As most digital booster DCC inputs would not work with 3.3V (please consult booster documentation) one need to choose a safe and reliable solution for level conversion
+- Example with SN74HCT125N as level shifter ([Fritzing circuit diagram](https://fritzing.org))
+
+<img src="fritzing/cs_01.png" width="800">
 
 ### DCC decoder
 
@@ -44,7 +48,12 @@ To mitigate some of the function setting issues the pico-cs command station is o
 
 - Connect the Raspberry Pi Pico to your PC via an USB cable
 - [Build](#build) the pico-cs firmware
-- Install firmware (Pico: cs.uf2, Pico w: cs_w.uf2) to the Raspberry Pi Pico via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
+- Install firmware (Pico: cs.uf2, Pico W: cs_w.uf2) via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
+- On macOS Ventura copying via drag&drop in Finder is broken - please copy via command line instead:
+```
+cp -X cs.uf2 /Volumes/RPI-RP2/
+cp -X cs_w.uf2 /Volumes/RPI-RP2/
+``` 
 - Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
 - Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
 - Raspberry Pi Pico DCC signal output is on GP2
@@ -57,7 +66,7 @@ As the binary for the Pico W including the WiFi and network capabilities is sign
 
 ```
 git clone https://github.com/pico-cs/firmware.git
-cd firmware/cs
+cd firmware/src
 ```
 
 Pico:
@@ -85,13 +94,13 @@ make
 
 With the help of the [picotool](https://github.com/raspberrypi/picotool) the firmware binaries can be expected:
 ```
-./picotool info -a <path to firmware>/firmware/cs/pico_build/cs.uf2 
+./picotool info -a <path to firmware>/firmware/src/pico_build/cs.uf2 
 
-File <path to firmware>/firmware/cs/pico_build/cs.uf2:
+File <path to firmware>/firmware/src/pico_build/cs.uf2:
 
 Program Information
  name:          cs
- version:       v0.1.9
+ version:       v0.1.10
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      double reset -> BOOTSEL
@@ -115,13 +124,13 @@ Build Information
 ```
 
 ```
-./picotool info -a <path to firmware>/firmware/cs/pico_w_build/cs_w.uf2
+./picotool info -a <path to firmware>/firmware/src/pico_w_build/cs_w.uf2
 
-File ../../pico-cs/firmware/cs/pico_w_build/cs_w.uf2:
+File ../../pico-cs/firmware/src/pico_w_build/cs_w.uf2:
 
 Program Information
  name:          cs_w
- version:       v0.1.9
+ version:       v0.1.10
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      WiFi SSID MyWifiName password MyPassword
@@ -155,12 +164,10 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 - Simple command human readable and debug friendly text protocol
   - which can be used directly via serial terminal programs supporting serial over USB
   - and easily integrated into any programming language or tool supporting serial over USB communication
+- Pico W WiFi support
 - [Go](https://go.dev/) [Client library](https://github.com/pico-cs/go-client)
 - [MQTT gateway](https://github.com/pico-cs/mqtt-gateway)
-
-## Outlook
-
-- Pico W TCP/IP server network connection 
+  - combined with a MQTT message broker like [mosquitto](https://mosquitto.org) the command station can be easily controlled by other tools as for example [Node-RED](https://nodered.org)
 
 ## Licensing
 

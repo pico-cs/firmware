@@ -5,10 +5,10 @@
 
 #include "board.h"
 
-bool board_init(board_t *board, writer_t *writer) {
+bool board_init(board_t *board, writer_t *logger) {
     bi_decl(bi_1pin_with_name(PICO_DEFAULT_LED_PIN, "On-board LED"));
 
-    board_init_common(board, writer);
+    board_init_common(board, logger);
     
     // init pico gpio led
     gpio_init(PICO_DEFAULT_LED_PIN);

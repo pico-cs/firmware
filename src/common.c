@@ -11,17 +11,18 @@ void uint8_hex_to_string(uint8_t arr[], int size, char str[], char delim) {
     str[size*3-1] = 0;
 }
 
-int read_char_from_usb(uint32_t timeout_us) {
-    return getchar_timeout_us(timeout_us);
+int usb_read(byte buf[], int size, uint32_t timeout_us) {
+    for (int i = 0; i < size; i++) {
+        int ch = getchar_timeout_us(timeout_us);
+        if (ch == PICO_ERROR_TIMEOUT) return i;
+        buf[i] = ch;
+    }
+    return size;
 }
 
-int write_string_to_usb(const char *s) { 
-    // return puts_raw(s); // cannot use - adds nl
-    int cnt = 0;
-    while (*s != 0) {
-        cnt += putchar_raw(*s);
-        s++;
+int usb_write(void *obj, const byte buf[], int size) {
+    for (int i = 0; i < size; i++) {
+        putchar_raw(buf[i]);
     }
-    return cnt;
-};
-int write_char_to_usb(int ch) { return putchar_raw(ch); }
+    return size;
+}

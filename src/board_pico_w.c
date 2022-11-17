@@ -7,18 +7,18 @@
 #include "board.h"
 
 #define WIFI_TEXT "WiFi SSID " WIFI_SSID " password " WIFI_PASSWORD
-#define TCP_TEXT  "TCP port " TCP_PORT
+#define TCP_TEXT  "TCP port " TCP_PORT_STRING
 
-bool board_init(board_t *board, writer_t *writer) {
+bool board_init(board_t *board, writer_t *logger) {
     bi_decl(bi_1pin_with_name(CYW43_WL_GPIO_LED_PIN, "CYW43 LED"));
 
     bi_decl(bi_program_feature(WIFI_TEXT));
     bi_decl(bi_program_feature(TCP_TEXT));
 
-    board_init_common(board, writer);
+    board_init_common(board, logger);
 
     if (cyw43_arch_init()) {
-        write_log(writer, "failed to initialize cyw43");
+        write_event(logger, "wifi: failed to initialize cyw43");
         return false;
     }
 
@@ -33,11 +33,11 @@ bool board_init(board_t *board, writer_t *writer) {
 
     while (!connected) {
 
-        write_log(writer, "connecting to WiFi...");
+        write_event(logger, "wifi: connecting...");
         if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
-            write_log(writer, "failed to connect");
+            write_event(logger, "wifi: failed to connect");
         } else {
-            write_log(writer, "connected");
+            write_event(logger, "wifi: connected");
             return true;
         }
     }

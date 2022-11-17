@@ -16,16 +16,21 @@ static bool read_is_whitespace(int ch) {
     return (ch == prot_char_space);
 }
 
-// TODO: overflow -> write log
-static bool read_frame(reader_t *reader) {
+void reader_init(reader_t *reader) {
+    reader_reset(reader);
+}
 
-    int cnt = 0;
-    int max_cnt = 100; // TODO
-    while (true) {
-        if (cnt >= max_cnt) return false;
-        
-        int ch = reader->read_char(reader->timeout_us);
-        if (ch == PICO_ERROR_TIMEOUT) return false;
+void reader_reset(reader_t *reader) {
+    reader->status = READER_INIT;
+    reader->pos = 0;
+}
+
+// TODO: overflow -> write log
+bool reader_read_frame(reader_t *reader, const byte buf[], int size) {
+
+    for (int i = 0; i < size; i++) {
+
+        int ch = buf[i];
 
         switch (reader->status) {
 
@@ -41,7 +46,7 @@ static bool read_frame(reader_t *reader) {
         default:
 
             // overflow check
-            if (reader->pos >= READER_BUFFER_SIZE) {
+            if (reader->pos >= PROT_BUFFER_SIZE) {
                 // ignore input
                 reader->pos = 0;
                 reader->status = READER_INIT;
@@ -72,26 +77,9 @@ static bool read_frame(reader_t *reader) {
             reader->buf[reader->pos++] = ch;
 
         }
-        cnt++;
     }
+    return false;
 }
-
-void reader_init(reader_t *reader, read_char_fn read_char) {
-    reader->timeout_us = 100; // TODO
-    reader->read_char = read_char;
-    reader_reset(reader);
-}
-
-void reader_reset(reader_t *reader) {
-    reader->status = READER_INIT;
-    reader->pos = 0;
-}
-
-void reader_poll(reader_t *reader) {
-    read_frame(reader);
-}
-
-bool reader_has_frame(reader_t *reader) { return reader->status == READER_END; }
 
 int reader_num_prm(reader_t *reader) {
     int cnt = 0;
@@ -161,52 +149,91 @@ bool parse_ternary(char *ptr, prot_ternary_t *v) {
 
 // writer
 
+// forward declaration
+static void writer_write_char(writer_t *writer, char ch);
+
 // called by vfctprintf
 void write_char(char ch, void *arg) {
-    ((writer_t *)arg)->write_char(ch);
+    writer_t *writer = (writer_t*)arg;
+    writer_write_char(writer, ch);
 }
 
-void writer_init(writer_t *writer, write_string_fn write_string, write_char_fn write_char) {
-    writer->write_string = write_string;
-    writer->write_char = write_char;
+static int writer_flush(writer_t *writer) {
+    // TODO check writer-pos --> return error
+    //if (writer->pos >= PROT_BUFFER_SIZE) {
+    // TODO error event
+    //}
+    int size = writer->pos;
+    writer->flush(writer->flusher, writer->buf, size);
+    writer->pos = 0;
+    return size;
 }
 
-int write_log(writer_t *writer, const char text[]) {
-    int cnt = writer->write_char(prot_tag_push);
-    cnt += writer->write_string(text);
-    cnt += writer->write_char(prot_char_nl);
-    return cnt;
+static void writer_write_char(writer_t *writer, char ch) {
+    if (writer->pos < PROT_BUFFER_SIZE) {
+        writer->buf[writer->pos++] = ch;
+    }   
+}    
+
+static void writer_write_string(writer_t *writer, const char *s) {
+    while (*s != 0 && writer->pos < PROT_BUFFER_SIZE) {
+        writer->buf[writer->pos++] = *s;
+        s++;
+    }
+}
+
+void writer_init(writer_t *writer, void *flusher, flush_fn flush) {
+    writer->flusher = flusher;
+    writer->flush = flush;
+    writer->pos = 0;
+}
+
+int write_event(writer_t *writer, const char text[]) {
+    writer_write_char(writer, prot_tag_push);
+    writer_write_string(writer, text);
+    writer_write_char(writer, prot_char_nl);
+    return writer_flush(writer);
+}
+
+int write_eventf(writer_t *writer, const char *format, ...) {
+    writer_write_char(writer, prot_tag_push);
+    va_list va;
+    va_start(va, format);
+    vfctprintf(&write_char, (void *)writer, format, va);
+    va_end(va);
+    writer_write_char(writer, prot_char_nl);
+    writer_flush(writer);
 }
 
 int write_error(writer_t *writer, const char text[]) {
-    int cnt = writer->write_char(prot_tag_error);
-    cnt += writer->write_string(text);
-    cnt += writer->write_char(prot_char_nl);
-    return cnt;
+    writer_write_char(writer, prot_tag_error);
+    writer_write_string(writer, text);
+    writer_write_char(writer, prot_char_nl);
+    return writer_flush(writer);
 }
 
 int write_success(writer_t *writer, const char *format, ...) {
-    int cnt = writer->write_char(prot_tag_success);
+    writer_write_char(writer, prot_tag_success);
     va_list va;
     va_start(va, format);
-    cnt += vfctprintf(&write_char, (void *)writer, format, va);
+    vfctprintf(&write_char, (void *)writer, format, va);
     va_end(va);
-    cnt += writer->write_char(prot_char_nl);
-    return cnt;
+    writer_write_char(writer, prot_char_nl);
+    return writer_flush(writer);
 }
 
 int write_multi(writer_t *writer, const char *format, ...) {
-    int cnt = writer->write_char(prot_tag_multi);
+    writer_write_char(writer, prot_tag_multi);
     va_list va;
     va_start(va, format);
-    cnt += vfctprintf(&write_char, (void *)writer, format, va);
+    vfctprintf(&write_char, (void *)writer, format, va);
     va_end(va);
-    cnt += writer->write_char(prot_char_nl);
-    return cnt;
+    writer_write_char(writer, prot_char_nl);
+    return writer_flush(writer);
 }
 
 int write_eor(writer_t *writer) { 
-    int cnt = writer->write_char(prot_tag_eor);
-    cnt += writer->write_char(prot_char_nl);
-    return cnt;
+    writer_write_char(writer, prot_tag_eor);
+    writer_write_char(writer, prot_char_nl);
+    return writer_flush(writer);
 }

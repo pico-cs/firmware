@@ -26,8 +26,8 @@ static board_type_t board_get_type() {
     */
 }
 
-void board_init_common(board_t *board, writer_t *writer) {
-    board->writer = writer;
+void board_init_common(board_t *board, writer_t *logger) {
+    board->logger = logger;
 
     adc_init();                        // configure adc
     adc_set_temp_sensor_enabled(true); // enable temperature sensor

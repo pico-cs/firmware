@@ -9,9 +9,9 @@
 #include "cmd.h"
 #include "exe.h"
 #include "channel.h"
+#include "loop.h"
 
-
-#define PROGRAM_VERSION     "v0.1.9"
+#define PROGRAM_VERSION     "v0.1.10"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
@@ -42,10 +42,10 @@ int main() {
     stdio_init_all();
 
     reader_t reader_usb;
-    reader_init(&reader_usb, &read_char_from_usb);
+    reader_init(&reader_usb);
     
     writer_t writer_usb;
-    writer_init(&writer_usb, &write_string_to_usb, &write_char_to_usb);
+    writer_init(&writer_usb, NULL, &usb_write);
 
     // then init board
     board_t board;
@@ -68,17 +68,7 @@ int main() {
     
     board_set_led(&board, false); // end init
 
-    while (true) {
-
-        reader_poll(&reader_usb);
-
-        if (reader_has_frame(&reader_usb)) {
-            cmd_dispatch(&cmd, &reader_usb, &writer_usb);
-            reader_reset(&reader_usb);
-        } 
-
-        sleep_us(100);
-    }
+    loop(&cmd, &reader_usb, &writer_usb);
 
     board_deinit(&board);
 }

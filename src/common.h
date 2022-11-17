@@ -13,8 +13,8 @@ typedef uint8_t  byte; // and let's have a byte as well
 
 // public interface
 void uint8_hex_to_string(uint8_t arr[], int size, char str[], char delim);
-int read_char_from_usb(uint32_t timeout_us); 
-int write_string_to_usb(const char *s);
-int write_char_to_usb(int ch);
+
+int usb_read(byte buf[], int size, uint32_t timeout_us);
+int usb_write(void *obj, const byte buf[], int size);
 
 #endif

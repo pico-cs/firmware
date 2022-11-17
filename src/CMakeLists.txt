@@ -15,6 +15,7 @@ if (PICO_BOARD STREQUAL "pico")
         prot.c
         board.c
         board_pico.c
+        loop_pico.c
         io.c
         cmd.c
         exe.c
@@ -90,6 +91,8 @@ if (PICO_BOARD STREQUAL "pico_w")
         prot.c
         board.c
         board_pico_w.c
+        loop_pico_w.c
+        tcp_server.c
         io.c
         cmd.c
         exe.c
@@ -102,7 +105,8 @@ if (PICO_BOARD STREQUAL "pico_w")
         PICO_W=1
         WIFI_SSID=\"${PICO_CS_WIFI_SSID}\"
         WIFI_PASSWORD=\"${PICO_CS_WIFI_PASSWORD}\"
-        TCP_PORT=\"${PICO_CS_TCP_PORT}\"
+        TCP_PORT=${PICO_CS_TCP_PORT}
+        TCP_PORT_STRING=\"${PICO_CS_TCP_PORT}\"
     )
     target_include_directories(cs_w PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
