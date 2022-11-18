@@ -60,6 +60,13 @@ cp -X cs_w.uf2 /Volumes/RPI-RP2/
 
 ## Build
 
+For building there is two options available:
+
+- [local build](#local): install the toolchain and build on your local machine
+- [docker build](https://github.com/pico-cs/docker-buld): no toolchain installation but a running docker environment on your local machine is required
+
+### Local
+
 To build the firmware the Raspberry Pi Pico C/C++ SDK and toolchain needs to be installed. For details please consult the [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html).
 
 As the binary for the Pico W including the WiFi and network capabilities is significant larger and the WiFi SSID and a WiFi password is needed two firmware versions are build:
@@ -92,7 +99,9 @@ make
 - if the TCP_PORT environment varible (PICO_CS_TCP_PORT) is not set the default port 4242 is used.
 - firmware: cs_w.uf2 
 
-With the help of the [picotool](https://github.com/raspberrypi/picotool) the firmware binaries can be expected:
+## Inspect the firmware binaries
+
+With the help of the [picotool](https://github.com/raspberrypi/picotool) the firmware binaries can be inspected:
 ```
 ./picotool info -a <path to firmware>/firmware/src/pico_build/cs.uf2 
 
