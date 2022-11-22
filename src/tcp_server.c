@@ -60,7 +60,11 @@ static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
 static err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
     tcp_server_t *server = (tcp_server_t*)arg;
     if (!p) {
-        write_event(server->logger, "tcp: receive failed");
+        write_event(server->logger, "tcp: connection has been closed");
+        return tcp_client_close(arg);
+    }
+    if (err != ERR_OK) {
+        write_eventf(server->logger, "tcp: receive error %d", err);
         return tcp_client_close(arg);
     }
     cyw43_arch_lwip_check();

@@ -18,12 +18,13 @@ void loop(cmd_t *cmd, reader_t *reader_usb, writer_t *writer_usb) {
 
     while (true) {
 
+        server.recv_len = 0;
+        
         cyw43_arch_poll();
         
         if (reader_read_frame(&tcp_reader, server.buffer_recv, server.recv_len)) {
             cmd_dispatch(cmd, &tcp_reader, &tcp_writer);
             reader_reset(&tcp_reader);
-            server.recv_len = 0; //TODO : ugly
         }
         
         int n = usb_read(usb_buf, PROT_BUFFER_SIZE, 10);
