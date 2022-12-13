@@ -3,18 +3,26 @@
 
 #include "common.h"
 
-#define IO_NUM 29  // number of general purpose io (gpio0 - gpio28)
+typedef enum {
+    IO_ADC_INPUT_VSYS =  3, // ADC GP29 (pico VSYS/3, pico_w ~0)
+    IO_ADC_INPUT_TEMP =  4, // internal temperature sensor
+    IO_NUM_ADC_INPUT  =  5, // number of ADC inputs
+    IO_NUM            = 30, // maximum number of GPIOs
+} io_adc_input_t;
 
-typedef enum { 
-    IO_OK    = 0, // ok
-    IO_INV   = 1, // invalid gpio number
-    IO_RSRV  = 2, // reserved gpio number
-    IO_NOOUT = 3, // is not GPIO_OUT
-} io_error_t;
+typedef enum {
+    IO_CMD_GET     = 0,
+    IO_CMD_PUT     = 1,
+    IO_CMD_GET_DIR = 2,
+    IO_CMD_SET_DIR = 3,
+    IO_CMD_NUM     = 4,
+} io_cmd_t;
 
 // public interface
 void io_init();
-io_error_t io_init_out(uint no);
-io_error_t io_set_gp(uint no, bool v);
+bool io_is_gpio_adc(uint gpio);
+bool io_is_gpio_avail(uint gpio);
+float io_adc_read(uint input);
+bool io_exe_cmdb(uint cmd, uint gpio, bool value);
 
 #endif

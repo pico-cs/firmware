@@ -50,4 +50,4 @@ void board_deinit(board_t *board) {
 }
 
 void board_set_led(board_t *board, bool v) { cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, v ? 1 : 0); }
-bool board_get_led(board_t *board)         {return cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN); }
+bool board_get_led(board_t *board)         { return cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN); }

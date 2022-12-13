@@ -5,7 +5,9 @@
 
 #include "dcc_tx.pio.h"
 
-static const uint EXE_DEFAULT_PIN_TX = 2;
+static const uint EXE_DEFAULT_TX_PIN      =  2;
+static const uint EXE_DEFAULT_TX_INV_PIN  =  3;
+static const uint EXE_DEFAULT_ENABLED_PIN = 22;
 static const PIO EXE_DEFAULT_PIO = pio0;
 static const uint EXE_DEFAULT_SM = 0;
 
@@ -59,21 +61,12 @@ static void exe_put(PIO pio, uint sm, word w) {
     dcc_tx_program_put(pio, sm, w);
 }
 
-void exe_init(exe_t *exe, rbuf_t *rbuf, channel_t *channel) {
-    bi_decl(bi_1pin_with_name(EXE_DEFAULT_PIN_TX, "DCC signal output"));
-
-    exe->enabled = true;
-    exe->rbuf = rbuf;
-    exe->channel = channel;
-
-    uint offset = pio_add_program(EXE_DEFAULT_PIO, &dcc_tx_program);
-    dcc_tx_program_init(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, offset, EXE_DEFAULT_PIN_TX);
-    dcc_tx_program_set_enabled(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, true);
-
-    dcc_init(&exe->dcc, exe_put, EXE_DEFAULT_PIO, EXE_DEFAULT_SM);
+static void exe_set_enabled(exe_t *exe, bool on) {
+     exe->enabled = on;
+     gpio_put(EXE_DEFAULT_ENABLED_PIN, on ? 1 : 0);
 }
 
-void exe_config(exe_t *exe, channel_in_t *in) {
+static void exe_config(exe_t *exe, channel_in_t *in) {
     channel_out_t out;
     
     switch (in->cmd) {
@@ -94,13 +87,13 @@ void exe_config(exe_t *exe, channel_in_t *in) {
         break;
     
     case CHANNEL_CMD_SET_ENABLED:
-        exe->enabled = in->enabled;
+        exe_set_enabled(exe, in->enabled);
         break;
     
     }
 }
 
-void exe_dispatch_disabled(exe_t *exe) {
+static void exe_dispatch_disabled(exe_t *exe) {
     channel_in_t in;
 
     channel_remove_blocking_qin(exe->channel, &in);
@@ -110,7 +103,7 @@ void exe_dispatch_disabled(exe_t *exe) {
     }                                  // else: ignore dcc command
 }
 
-void exe_dispatch_enabled(exe_t *exe) {
+static void exe_dispatch_enabled(exe_t *exe) {
     rbuf_entry_t entry;
     channel_in_t in;
 
@@ -130,6 +123,25 @@ void exe_dispatch_enabled(exe_t *exe) {
     } else {
         dcc_idle(&exe->dcc);
     }
+}
+
+void exe_init(exe_t *exe, rbuf_t *rbuf, channel_t *channel) {
+    bi_decl(bi_1pin_with_name(EXE_DEFAULT_TX_PIN, "DCC signal output"));
+    bi_decl(bi_1pin_with_name(EXE_DEFAULT_TX_INV_PIN, "DCC signal output (inverted)"));
+    bi_decl(bi_1pin_with_name(EXE_DEFAULT_ENABLED_PIN, "DCC signal enabled"));
+
+    gpio_init(EXE_DEFAULT_ENABLED_PIN);
+    gpio_set_dir(EXE_DEFAULT_ENABLED_PIN, GPIO_OUT);
+
+    exe_set_enabled(exe, false); // start not enabled
+    exe->rbuf = rbuf;
+    exe->channel = channel;
+
+    uint offset = pio_add_program(EXE_DEFAULT_PIO, &dcc_tx_program);
+    dcc_tx_program_init(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, offset, EXE_DEFAULT_TX_PIN, EXE_DEFAULT_TX_INV_PIN);
+    dcc_tx_program_set_enabled(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, true);
+
+    dcc_init(&exe->dcc, exe_put, EXE_DEFAULT_PIO, EXE_DEFAULT_SM);
 }
 
 void exe_dispatch(exe_t *exe) {

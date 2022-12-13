@@ -31,7 +31,7 @@ The protocol is not strictly command->reply based as the command station might s
 #### cl [t|f]
     
     Returns or sets the value for the internal Pico led where
-    - t sets the led on is the command staion is enabled
+    - t sets the led on if the command station is enabled
     - f sets the led off.
 
    ***
@@ -70,13 +70,13 @@ The protocol is not strictly command->reply based as the command station might s
     - ~ toggles the direction.
 
    ***
-#### ls \<addr\> [<speed128]
+#### ls \<addr\> [0..127]
 
     Return or sets the speed of loco with address \<addr\> where
     - speed 0 is stop
     - speed 1 is emergency stop and
-    - speed 2 - 128 are the 126 speed steps supported by DCC.
-
+    - speed 2 - 127 are the 126 speed steps supported by DCC.
+    
    ***
 #### lf \<addr\> \<no\> [t|f|~]
 
@@ -114,6 +114,28 @@ The protocol is not strictly command->reply based as the command station might s
 
     Returns the value ov CV 17 and CV 18 of loco with address \<addr\>.
 
+   ***
+#### ioadc 0..4
+
+    Returns the 'raw' value (assume ADC_VREF == 3.3 V) of the ADC input with
+    - 0: GPIO26
+    - 1: GPIO27
+    - 2: GPIO28
+    - 3: GPIO29 (pico internal)
+    - 4: pico temperature sensor
+
+   ***
+#### iocmdb \<cmd\> \<gpio\> [t|f]
+
+    Experimental!
+
+    Executes a boolean GPIO command and returns the boolean value with cmd
+    - 0: get GPIO value
+    - 1: put GPIO value
+    - 2: get GPIO direction
+    - 3: set GPIO direction (t is out and f is in)
+    Allowed GPIO values are
+    - 6..15, 20 and 21 
 
 ### Examples
 

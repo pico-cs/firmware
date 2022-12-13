@@ -56,7 +56,10 @@ cp -X cs_w.uf2 /Volumes/RPI-RP2/
 ``` 
 - Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
 - Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
-- Raspberry Pi Pico DCC signal output is on GP2
+- The firmware uses the following Raspberry Pi Pico GPIOs:
+  - GP2:  DCC signal output
+  - GP3:  DCC signal output (inverted)
+  - GP22: DCC signal enabled 
 
 ## Build
 
@@ -109,26 +112,28 @@ File <path to firmware>/firmware/src/pico_build/cs.uf2:
 
 Program Information
  name:          cs
- version:       v0.1.10
+ version:       v0.3.0
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      double reset -> BOOTSEL
                 UART stdin / stdout
                 USB stdin / stdout
  binary start:  0x10000000
- binary end:    0x1000cf2c
+ binary end:    0x1000d144
 
 Fixed Pin Information
  0:   UART0 TX
  1:   UART0 RX
  2:   DCC signal output
+ 3:   DCC signal output (inverted)
+ 22:  DCC signal enabled
  25:  On-board LED
 
 Build Information
  sdk version:       1.4.0
  pico_board:        pico
  boot2_name:        boot2_w25q080
- build date:        Nov 13 2022
+ build date:        Dec 13 2022
  build attributes:  Release
 ```
 
@@ -139,27 +144,29 @@ File ../../pico-cs/firmware/src/pico_w_build/cs_w.uf2:
 
 Program Information
  name:          cs_w
- version:       v0.1.10
+ version:       v0.3.0
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
- features:      WiFi SSID MyWifiName password MyPassword
+ features:      WiFi SSID MyWiFiSSID password MyWiFiPassword
                 TCP port 4242
                 double reset -> BOOTSEL
                 UART stdin / stdout
                 USB stdin / stdout
  binary start:  0x10000000
- binary end:    0x100536dc
+ binary end:    0x10054894
 
 Fixed Pin Information
- 0:  CYW43 LED, UART0 TX
- 1:  UART0 RX
- 2:  DCC signal output
+ 0:   CYW43 LED, UART0 TX
+ 1:   UART0 RX
+ 2:   DCC signal output
+ 3:   DCC signal output (inverted)
+ 22:  DCC signal enabled
 
 Build Information
  sdk version:       1.4.0
  pico_board:        pico_w
  boot2_name:        boot2_w25q080
- build date:        Nov 13 2022
+ build date:        Dec 13 2022
  build attributes:  Release
 ```
 

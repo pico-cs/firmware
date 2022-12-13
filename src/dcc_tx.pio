@@ -26,16 +26,19 @@ long:                       ;
 
 static const uint64_t freq = 500000; // state machine frequency: 500 000 HZ (2us per instruction)
 
-static inline void dcc_tx_program_init(PIO pio, uint sm, uint offset, uint pin_tx) {
-    pio_gpio_init(pio, pin_tx);
-    pio_sm_set_consecutive_pindirs(pio, sm, pin_tx, 1, true);
+static inline void dcc_tx_program_init(PIO pio, uint sm, uint offset, uint tx_pin, uint tx_inv_pin) {
+    pio_gpio_init(pio, tx_pin);
+    pio_gpio_init(pio, tx_inv_pin);
+    gpio_set_outover(tx_inv_pin, GPIO_OVERRIDE_INVERT);
+
+    pio_sm_set_consecutive_pindirs(pio, sm, tx_pin, 2, true);
     
     pio_sm_config c = dcc_tx_program_get_default_config(offset);
 
     // OUT shifts to left (msb first), autopull, threshold 32 bits 
     sm_config_set_out_shift(&c, false, true, 32);
-    // SET pin pin_tx, only one pin
-    sm_config_set_set_pins(&c, pin_tx, 1);
+    // SET pin tx_pin, two pins
+    sm_config_set_set_pins(&c, tx_pin, 2);
     
     // No RX, so join RX fifo to TX fifo (in total 8 words)
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);

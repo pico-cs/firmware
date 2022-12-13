@@ -1,55 +1,70 @@
+#include "hardware/adc.h"
+
 #include "io.h"
 
-const byte IO_PIN_INITIAL  = 0x00;
-const byte IO_PIN_RESERVED = 0x01;
-const byte IO_PIN_OUT      = 0x02;
+/* GPIOs
+- GPIO0:           reserved: UART0 TX (default)
+- GPIO1:           reserved: UART0 RX (default)
+- GPIO2:           DCC output
+- GPIO3:           DCC output inverted
+- GPIO4:           reserved: I2C0 SDA (default)
+- GPIO5:           reserved: I2C0 SCL (default)
+- GPIO6  - GPIO15: available
+- GPIO16:          reserved: SPIO RX  (default)
+- GPIO17:          reserved: SPIO SCn (default)
+- GPIO18:          reserved: SPIO SCK (default)
+- GPIO19:          reserved: SPIO TX  (default)
+- GPIO20 - GPIO21: available
+- GPIO22:          DCC enabled
+- GPIO23:          reserved: PICO internal use
+- GPIO24:          reserved: PICO internal use
+- GPIO25:          reserved: (on board LED - pico only)
+- GPIO26:          ADC: ADC0
+- GPIO27:          ADC: ADC1
+- GPIO28:          ADC: ADC2
+- GPIO29:          ADC: ADC3 / PICO internal use
+*/
 
-static byte gp[IO_NUM] = {
-    IO_PIN_RESERVED,              // GPIO0
-    IO_PIN_RESERVED,              // GPIO1
-    IO_PIN_RESERVED,              // GPIO2 (DCC output) // TODO configurable
-    IO_PIN_RESERVED,              // GPIO3
-    IO_PIN_RESERVED,              // GPIO4
-    IO_PIN_RESERVED,              // GPIO5
-    IO_PIN_INITIAL,               // GPIO6
-    IO_PIN_INITIAL,               // GPIO7
-    IO_PIN_INITIAL,               // GPIO8
-    IO_PIN_INITIAL,               // GPIO9
-    IO_PIN_INITIAL,               // GPIO10
-    IO_PIN_INITIAL,               // GPIO11
-    IO_PIN_INITIAL,               // GPIO12
-    IO_PIN_INITIAL,               // GPIO13
-    IO_PIN_INITIAL,               // GPIO14
-    IO_PIN_INITIAL,               // GPIO15
-    IO_PIN_RESERVED,              // GPIO16
-    IO_PIN_RESERVED,              // GPIO17
-    IO_PIN_RESERVED,              // GPIO18
-    IO_PIN_RESERVED,              // GPIO19
-    IO_PIN_RESERVED,              // GPIO20
-    IO_PIN_RESERVED,              // GPIO21
-    IO_PIN_RESERVED,              // GPIO22
-    IO_PIN_RESERVED,              // GPIO23
-    IO_PIN_RESERVED,              // GPIO24
-    IO_PIN_RESERVED | IO_PIN_OUT, // GPIO25 (on board LED - pico only)
-    IO_PIN_RESERVED,              // GPIO26
-    IO_PIN_RESERVED,              // GPIO27
-    IO_PIN_RESERVED,              // GPIO28
-};
+static uint32_t io_gpio_adc = 1 << 26 | 1 << 27 | 1 << 28 | 1 << 29;
 
-void io_init() {}
+static uint32_t io_gpio_avail =
+    1 << 6 | 1 << 7 | 1 << 8 | 1 << 9 | 1 << 10 | 1 << 11 | 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 20 | 1 << 21;
 
-io_error_t io_init_out(uint no) {
-    if (no >= IO_NUM) return IO_INV;
-    if ((gp[no] & IO_PIN_RESERVED) != 0) return IO_RSRV;
-    gp[no] = IO_PIN_OUT;
-    gpio_init(no);
-    gpio_set_dir(no, GPIO_OUT);
-    return IO_OK;
+// 12-bit conversion, assume max value == ADC_VREF == 3.3 V
+static const float conversion_factor = 3.3f / (1 << 12);
+
+bool io_is_gpio_adc(uint gpio) {
+    if (gpio > IO_NUM) return false;
+    return io_gpio_adc & (1 << gpio) ? true : false;
 }
 
-io_error_t io_set_gp(uint no, bool v) {
-    if (no >= IO_NUM) return IO_INV;
-    if ((gp[no] & IO_PIN_OUT) == 0) return IO_NOOUT;
-    gpio_put(no, v ? 1 : 0);
-    return IO_OK;
+bool io_is_gpio_avail(uint gpio) {
+    if (gpio > IO_NUM) return false;
+    return io_gpio_avail & (1 << gpio) ? true : false;
+}
+
+float io_adc_read(uint input) {
+    adc_select_input(input);
+    uint16_t result = adc_read();
+    return (float)result * conversion_factor;
+}
+
+bool io_exe_cmdb(uint cmd, uint gpio, bool value) {
+    if (!io_is_gpio_avail(gpio)) return false;
+
+    switch (cmd) {
+    case IO_CMD_GET:     return gpio_get(gpio);
+    case IO_CMD_PUT:     gpio_put(gpio, value); return value;
+    case IO_CMD_GET_DIR: return gpio_get_dir(gpio);
+    case IO_CMD_SET_DIR: gpio_set_dir(gpio, value); return value;
+    }
+}
+
+void io_init() {
+    adc_init();                                     // configure adc
+    for (uint i = 0; i < IO_NUM; i++) {
+        if (io_is_gpio_adc(i))   adc_gpio_init(i);  // init adc gpio
+        if (io_is_gpio_avail(i)) gpio_init(i);      // init gpio
+    }
+    adc_set_temp_sensor_enabled(true); // enable temperature sensor
 }

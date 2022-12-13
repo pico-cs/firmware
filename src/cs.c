@@ -11,7 +11,7 @@
 #include "channel.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.2.0"
+#define PROGRAM_VERSION     "v0.3.0"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
@@ -47,14 +47,15 @@ int main() {
     writer_t writer_usb;
     writer_init(&writer_usb, NULL, &usb_write);
 
+    // init io before board
+    io_init();
+
     // then init board
     board_t board;
     if (!board_init(&board, &writer_usb)) {
         return -1;
     }
-           
-    io_init();
-    
+
     board_set_led(&board, true); // start init
 
     channel_init(&channel);

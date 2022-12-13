@@ -7,7 +7,7 @@
 #include "channel.h"
 #include "prot.h"
 
-#define CMD_MAX_COMMAND 16
+#define CMD_MAX_COMMAND 18
 #define CMD_MAX_RV      10
 
 static const char* cmd_rvs[CMD_MAX_RV] = {
@@ -17,9 +17,9 @@ static const char* cmd_rvs[CMD_MAX_RV] = {
 	"invnumprm",     // invalid number of parameters
 	"nodata",        // no data available
 	"nochange",      // data not changed by command
-	"invgpio",       // currently not used
-	"rsrvgpio",      // currently not used
-	"nooutgpio",     // currently not used
+	"invgpio",       // invalid gpio number
+	"free1",         // currently not used
+	"free2",         // currently not used
 	"notimpl",       // command not implemented
 };
 
@@ -30,9 +30,9 @@ typedef enum {
 	CMD_RC_INVNUMPRM   = 3,
 	CMD_RC_NODATA      = 4,
 	CMD_RC_NOCHANGE    = 5,
-	CMD_RC_INVGPIO_X   = 6, // currently not used 
-	CMD_RC_RSRVGPIO_X  = 7, // currently not used
-	CMD_RC_NOOUTGPIO_X = 8, // currently not used
+	CMD_RC_INVGPIO     = 6, 
+	CMD_RC_FREE1       = 7, // currently not used
+	CMD_RC_FREE2       = 8, // currently not used
 	CMD_RC_NOTIMPL     = 9,
 } cmd_rc_t;
 
@@ -52,13 +52,15 @@ static const cmd_command_entry_t cmd_commands[CMD_MAX_COMMAND] = {
 	{"cr",        NULL,                     "refresh buffer"},
 	{"cd",        "<addr>",                 "delete loco from refresh buffer"},
 	{"ld",        "<addr> [t|f|~]",         "loco direction"},
-	{"ls",        "<addr> [<speed128]",     "loco speed"},
+	{"ls",        "<addr> [0..127]",        "loco speed"},
 	{"lf",        "<addr> <no> [t|f|~]",    "loco function"},
 	{"lcvbyte",   "<addr> <idx> <cv>",      "loco write cv byte"},
 	{"lcvbit",    "<addr> <idx> <bit> t|f", "loco write cv bit"},
 	{"lcv29bit5", "<addr> t|f",             "loco set cv29 bit 5"},
 	{"lladdr",    "<addr> <laddr>",         "loco set long address"},
-	{"lcv1718",   "<addr>",                 "loco calculate cv17 cv18"}
+	{"lcv1718",   "<addr>",                 "loco calculate cv17 cv18"},
+	{"ioadc",     "0..4",                   "io read adc input"},
+	{"iocmdb",    "<cmd> <gpio> [t|f]",     "io execute boolean gpio command"},
 };
 
 /*
@@ -83,11 +85,9 @@ typedef enum {
 	CMD_COMMAND_LOCO_CV29_BIT5 = 14,
 	CMD_COMMAND_LOCO_LADDR     = 15,
 	CMD_COMMAND_LOCO_CV1718    = 16,
+	CMD_COMMAND_IO_ADC         = 17,
+	CMD_COMMAND_IO_CMDB        = 18,
 } cmd_command_t;
-
-/*
-cmdSwitch          = "sw"
-*/
 
 typedef enum {
 	CMD_FLAG_ENABLED = (byte)0x01, // important: byte cast

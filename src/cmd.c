@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "hardware/adc.h"
 
 #include "cmd.h"
 #include "board.h"
@@ -90,12 +89,8 @@ static cmd_rc_t cmd_led(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *wri
 
 static cmd_rc_t cmd_temp(cmd_t *cmd, int num_prm, writer_t *writer) {
     if (!cmd_check_num_prm(num_prm, 1, 1)) return CMD_RC_INVNUMPRM;
-    adc_select_input(4); // internal temperature sensor 
-    // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
-    const double conversion_factor = 3.3f / (1 << 12);
-    uint16_t result = adc_read();
-
-    write_success(writer, "%f", 27 - ((result * conversion_factor) - 0.706) / 0.001721);
+    float result = io_adc_read(IO_ADC_INPUT_TEMP);
+    write_success(writer, "%f", 27 - (result - 0.706) / 0.001721);
     return CMD_RC_OK;
 }
 
@@ -389,6 +384,40 @@ static cmd_rc_t cmd_loco_cv1718(cmd_t *cmd, int num_prm, reader_t *reader, write
     return CMD_RC_OK;
 }
 
+static cmd_rc_t cmd_io_adc(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
+    if (!cmd_check_num_prm(num_prm, 2, 2)) return CMD_RC_INVNUMPRM;
+    
+    uint input;
+
+    if (!parse_uint(reader_get_prm(reader, 1), &input)) return CMD_RC_INVPRM;
+    if (!(input < IO_NUM_ADC_INPUT)) return CMD_RC_INVPRM;
+
+    write_success(writer, "%f", io_adc_read(input));
+    return CMD_RC_OK;
+}
+
+static cmd_rc_t cmd_io_cmdb(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
+    if (!cmd_check_num_prm(num_prm, 3, 4)) return CMD_RC_INVNUMPRM;
+
+    uint io_cmd;
+    if (!parse_uint(reader_get_prm(reader, 1), &io_cmd)) return CMD_RC_INVPRM;
+    if (!(io_cmd < IO_CMD_NUM)) return CMD_RC_INVPRM;
+
+    uint gpio;
+    if (!parse_uint(reader_get_prm(reader, 2), &gpio)) return CMD_RC_INVPRM;
+    if (!io_is_gpio_avail(gpio)) return CMD_RC_INVGPIO;
+
+    bool value;
+    if (num_prm == 4) {
+        if (!parse_bool(reader_get_prm(reader, 3), &value)) return CMD_RC_INVPRM;
+    }
+
+    value = io_exe_cmdb(io_cmd, gpio, value);
+    write_success(writer, "%c", value?prot_true:prot_false);
+    
+    return CMD_RC_OK;
+}
+
 void cmd_dispatch(cmd_t *cmd, reader_t *reader, writer_t *writer) {
 
     int num_prm = reader_num_prm(reader);
@@ -413,6 +442,8 @@ void cmd_dispatch(cmd_t *cmd, reader_t *reader, writer_t *writer) {
     case CMD_COMMAND_LOCO_CV29_BIT5: rc = cmd_loco_cv29_bit5(cmd, num_prm, reader, writer); break;
     case CMD_COMMAND_LOCO_LADDR:     rc = cmd_loco_laddr(cmd, num_prm, reader, writer);     break;
     case CMD_COMMAND_LOCO_CV1718:    rc = cmd_loco_cv1718(cmd, num_prm, reader, writer);    break;
+    case CMD_COMMAND_IO_ADC:         rc = cmd_io_adc(cmd, num_prm, reader, writer);         break;
+    case CMD_COMMAND_IO_CMDB:        rc = cmd_io_cmdb(cmd, num_prm, reader, writer);        break;
     default:                         rc = CMD_RC_NOTIMPL;                                   break;
     }
 
