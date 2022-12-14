@@ -22,6 +22,9 @@ bool board_init(board_t *board, writer_t *logger) {
         return false;
     }
 
+    // enable led during bootstrap
+    board_set_led(board, true);
+
     cyw43_arch_enable_sta_mode();
 
     // MAC adddress
@@ -41,7 +44,6 @@ bool board_init(board_t *board, writer_t *logger) {
             return true;
         }
     }
-    //run_tcp_server_test();
     return true;
 }
 
@@ -49,5 +51,5 @@ void board_deinit(board_t *board) {
     cyw43_arch_deinit();
 }
 
-void board_set_led(board_t *board, bool v) { cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, v ? 1 : 0); }
+void board_set_led(board_t *board, bool v) { cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, board->led_enabled && v); }
 bool board_get_led(board_t *board)         { return cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN); }

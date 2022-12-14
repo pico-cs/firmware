@@ -56,8 +56,6 @@ int main() {
         return -1;
     }
 
-    board_set_led(&board, true); // start init
-
     channel_init(&channel);
     rbuf_init(&rbuf, &channel);
         
@@ -67,8 +65,10 @@ int main() {
     multicore_launch_core1(core1_main);
     multicore_fifo_pop_blocking(); // wait for core1 to be started
     
-    board_set_led(&board, false); // end init
-
+    // after bootstrap set board led to right value. 
+    bool enabled = channel_get_enabled(&channel);
+    board_set_led(&board, enabled);
+    
     loop(&cmd, &reader_usb, &writer_usb);
 
     board_deinit(&board);

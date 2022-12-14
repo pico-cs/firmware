@@ -15,7 +15,7 @@ typedef enum {
     IO_CMD_PUT     = 1,
     IO_CMD_GET_DIR = 2,
     IO_CMD_SET_DIR = 3,
-    IO_CMD_NUM     = 4,
+    IO_NUM_CMD     = 4,
 } io_cmd_t;
 
 // public interface

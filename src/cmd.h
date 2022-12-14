@@ -98,7 +98,6 @@ typedef struct {
 	board_t *board;
 	rbuf_t *rbuf;
 	channel_t *channel;
-	byte flags; 
 } cmd_t; // command
 
 // public interface

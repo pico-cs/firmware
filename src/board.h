@@ -18,10 +18,13 @@ typedef struct {
     board_type_t type;
     char id[PICO_UNIQUE_BOARD_ID_SIZE_BYTES*3];
     char mac[MAC_SIZE_BYTES*3]; // wifi station mac address (empty in case of pico)
+    bool led_enabled;
 } board_t;
 
 // public interface
 void board_init_common(board_t *board, writer_t *logger);
+bool board_get_led_enabled(board_t *board);
+void board_set_led_enabled(board_t *board, bool v);
 
 bool board_init(board_t *board, writer_t *logger);
 void board_deinit(board_t *board);

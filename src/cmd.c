@@ -19,27 +19,11 @@ static cmd_command_t cmd_find_command(char *command) {
     return CMD_COMMAND_NOP;
 }
 
-inline static void cmd_set_flag(cmd_t *cmd, bool on, byte flag) {
-    if (on == true) {
-        cmd->flags |= flag;
-    } else {
-        cmd->flags &= ~flag;
-    }
-}
-inline static bool cmd_get_flag(cmd_t *cmd, byte flag) {return ((cmd->flags & flag) != 0);}
-
-inline static void cmd_set_led(cmd_t *cmd) {
-    // io_get_led();
-    board_set_led(cmd->board, cmd_get_flag(cmd, CMD_FLAG_ENABLED) && cmd_get_flag(cmd, CMD_FLAG_LED));
-}
-
 void cmd_init(cmd_t *cmd, board_t *board, rbuf_t *rbuf, channel_t *channel) {
     cmd->board = board;
     cmd->rbuf = rbuf;
     cmd->channel = channel;
-    channel_set_enabled(cmd->channel, false);   // start disabled
-    cmd_set_flag(cmd, false, CMD_FLAG_ENABLED); // set enabled off
-    cmd_set_flag(cmd, true, CMD_FLAG_LED);  // set led on 
+    // channel_set_enabled(cmd->channel, false);   // start disabled
 }
 
 static cmd_rc_t cmd_help(cmd_t *cmd, int num_prm, writer_t *writer) {
@@ -74,12 +58,13 @@ static cmd_rc_t cmd_led(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *wri
         
     switch (num_prm) {
     case 1:
-        on = cmd_get_flag(cmd, CMD_FLAG_LED);
+        on = board_get_led_enabled(cmd->board);
         break;
     case 2:
         if (!parse_bool(reader_get_prm(reader, 1), &on)) return CMD_RC_INVPRM;
-        cmd_set_flag(cmd, on, CMD_FLAG_LED);
-        cmd_set_led(cmd);
+        board_set_led_enabled(cmd->board, on);
+        bool enabled = channel_get_enabled(cmd->channel);
+        board_set_led(cmd->board, enabled);
         break;
     }
 
@@ -120,14 +105,12 @@ static cmd_rc_t cmd_enabled(cmd_t *cmd, int num_prm, reader_t *reader, writer_t 
     
     switch (num_prm) {
     case 1:
-        on = cmd_get_flag(cmd, CMD_FLAG_ENABLED);
-        //on = channel_get_enabled(cmd->channel);
+        on = channel_get_enabled(cmd->channel);
         break;
     case 2:
         if (!parse_bool(reader_get_prm(reader, 1), &on)) return CMD_RC_INVPRM;
         channel_set_enabled(cmd->channel, on);
-        cmd_set_flag(cmd, on, CMD_FLAG_ENABLED);
-        cmd_set_led(cmd);
+        board_set_led(cmd->board, on);
         break;
     }
 
@@ -401,7 +384,7 @@ static cmd_rc_t cmd_io_cmdb(cmd_t *cmd, int num_prm, reader_t *reader, writer_t 
 
     uint io_cmd;
     if (!parse_uint(reader_get_prm(reader, 1), &io_cmd)) return CMD_RC_INVPRM;
-    if (!(io_cmd < IO_CMD_NUM)) return CMD_RC_INVPRM;
+    if (!(io_cmd < IO_NUM_CMD)) return CMD_RC_INVPRM;
 
     uint gpio;
     if (!parse_uint(reader_get_prm(reader, 2), &gpio)) return CMD_RC_INVPRM;

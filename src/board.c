@@ -29,4 +29,10 @@ void board_init_common(board_t *board, writer_t *logger) {
     board->type = board_get_type();
     // clear mac
     board->mac[0] = 0;
+    // led enabled by default
+    board->led_enabled = true;
 }
+
+bool board_get_led_enabled(board_t *board)         { return board->led_enabled; }
+void board_set_led_enabled(board_t *board, bool v) { board->led_enabled = v; }
+
