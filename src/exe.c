@@ -6,7 +6,7 @@
 #include "dcc_tx.pio.h"
 
 static const uint EXE_DEFAULT_TX_PIN      =  2;
-static const uint EXE_DEFAULT_TX_INV_PIN  =  3;
+static const uint EXE_DEFAULT_TX_INV_PIN  =  EXE_DEFAULT_TX_PIN + 1;
 static const uint EXE_DEFAULT_ENABLED_PIN = 22;
 static const PIO EXE_DEFAULT_PIO = pio0;
 static const uint EXE_DEFAULT_SM = 0;
@@ -138,7 +138,7 @@ void exe_init(exe_t *exe, rbuf_t *rbuf, channel_t *channel) {
     exe->channel = channel;
 
     uint offset = pio_add_program(EXE_DEFAULT_PIO, &dcc_tx_program);
-    dcc_tx_program_init(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, offset, EXE_DEFAULT_TX_PIN, EXE_DEFAULT_TX_INV_PIN);
+    dcc_tx_program_init(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, offset, EXE_DEFAULT_TX_PIN);
     dcc_tx_program_set_enabled(EXE_DEFAULT_PIO, EXE_DEFAULT_SM, true);
 
     dcc_init(&exe->dcc, exe_put, EXE_DEFAULT_PIO, EXE_DEFAULT_SM);

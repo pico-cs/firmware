@@ -1,4 +1,18 @@
+
 .program dcc_tx
+
+// using two pins
+// - first outputs DCC signal
+// - second outputs inverted DCC signal
+.define public num_pin 2
+// high pins value:
+// - first pin set to high
+// - second pin set to low (inverted) 
+.define public high 0b00001
+// low pins valua:
+// - first pin set to low
+// - second pin set to high (inverted) 
+.define public low 0b00010
 
 ; DCC bit transmission
 ; Bit = 1: 116us ( 58us high +  58us low signal) 
@@ -11,14 +25,14 @@
 ; -> 100us signal equals 50 instructions
 
 loop:                       ; 
-    set pins 1       [26]   ; set signal high
+    set pins high    [26]   ; set high signal
     out x, 1                ; shift msb (left) bit into x
     jmp !x long             ; if bit = 0 jump to long signal
-    set pins 0       [27]   ; set signal low (short signal)
+    set pins low     [27]   ; set low signal (short signal)
     jmp loop                ; end of short signal
 long:                       ;
     nop              [20]   ; extend high signal to 100us
-    set pins 0       [31]   ; set signal low (long signal)
+    set pins low     [31]   ; set low signal (long signal)
     nop              [17]   ; ...cont
 
 % c-sdk {
@@ -26,19 +40,19 @@ long:                       ;
 
 static const uint64_t freq = 500000; // state machine frequency: 500 000 HZ (2us per instruction)
 
-static inline void dcc_tx_program_init(PIO pio, uint sm, uint offset, uint tx_pin, uint tx_inv_pin) {
-    pio_gpio_init(pio, tx_pin);
-    pio_gpio_init(pio, tx_inv_pin);
-    gpio_set_outover(tx_inv_pin, GPIO_OVERRIDE_INVERT);
-
-    pio_sm_set_consecutive_pindirs(pio, sm, tx_pin, 2, true);
+static inline void dcc_tx_program_init(PIO pio, uint sm, uint offset, uint base_pin) {
+    for (uint i = 0; i < dcc_tx_num_pin; i++) {
+        pio_gpio_init(pio, base_pin + i);
+    }
+    
+    pio_sm_set_consecutive_pindirs(pio, sm, base_pin, dcc_tx_num_pin, true);
     
     pio_sm_config c = dcc_tx_program_get_default_config(offset);
 
     // OUT shifts to left (msb first), autopull, threshold 32 bits 
     sm_config_set_out_shift(&c, false, true, 32);
-    // SET pin tx_pin, two pins
-    sm_config_set_set_pins(&c, tx_pin, 2);
+    // SET pins
+    sm_config_set_set_pins(&c, base_pin, dcc_tx_num_pin);
     
     // No RX, so join RX fifo to TX fifo (in total 8 words)
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
