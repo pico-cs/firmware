@@ -9,7 +9,7 @@
 // - first pin set to high
 // - second pin set to low (inverted) 
 .define public high 0b00001
-// low pins valua:
+// low pins value:
 // - first pin set to low
 // - second pin set to high (inverted) 
 .define public low 0b00010
