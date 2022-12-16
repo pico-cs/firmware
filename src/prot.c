@@ -136,13 +136,13 @@ bool parse_bool(char *ptr, bool *v) {
     return false;
 }
 
-bool parse_ternary(char *ptr, prot_ternary_t *v) {
-    *v = PROT_TERNARY_FALSE;
+bool parse_ternary(char *ptr, ternary_t *v) {
+    *v = TERNARY_FALSE;
     if (strlen(ptr) != 1) return false;
     switch (*ptr) {
-    case prot_true:   *v = PROT_TERNARY_TRUE;   return true;
-    case prot_false:  *v = PROT_TERNARY_FALSE;  return true;
-    case prot_toggle: *v = PROT_TERNARY_TOGGLE; return true;
+    case prot_true:   *v = TERNARY_TRUE;   return true;
+    case prot_false:  *v = TERNARY_FALSE;  return true;
+    case prot_toggle: *v = TERNARY_TOGGLE; return true;
     }
     return false;
 }

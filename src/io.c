@@ -49,14 +49,28 @@ float io_adc_read(uint input) {
     return (float)result * conversion_factor;
 }
 
-bool io_exe_cmdb(uint cmd, uint gpio, bool value) {
+bool io_exe_cmdb(uint cmd, uint gpio, ternary_t value) {
     if (!io_is_gpio_avail(gpio)) return false;
+
+    bool b;
 
     switch (cmd) {
     case IO_CMD_GET:     return gpio_get(gpio);
-    case IO_CMD_PUT:     gpio_put(gpio, value); return value;
     case IO_CMD_GET_DIR: return gpio_get_dir(gpio);
-    case IO_CMD_SET_DIR: gpio_set_dir(gpio, value); return value;
+    case IO_CMD_PUT:
+        switch (value) {
+        case TERNARY_FALSE:  gpio_put(gpio, false); return false;
+        case TERNARY_TRUE:   gpio_put(gpio, true); return true;
+        case TERNARY_TOGGLE: b = !gpio_get(gpio); gpio_put(gpio, b); return b;
+        default:             return false; // should never happen
+        }
+    case IO_CMD_SET_DIR:
+        switch (value) {
+        case TERNARY_FALSE:  gpio_set_dir(gpio, false); return false;
+        case TERNARY_TRUE:   gpio_set_dir(gpio, true); return true;
+        case TERNARY_TOGGLE: b = !gpio_get_dir(gpio); gpio_set_dir(gpio, b); return b;
+        default:             return false; // should never happen
+        }
     }
 }
 

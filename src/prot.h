@@ -22,12 +22,6 @@ static const char prot_true   = 't';
 static const char prot_false  = 'f';
 static const char prot_toggle = '~';
 
-typedef enum{
-	PROT_TERNARY_FALSE  = 0,
-	PROT_TERNARY_TRUE   = 1,
-	PROT_TERNARY_TOGGLE = 2,
-} prot_ternary_t;
-
 // reader
 
 typedef enum { 
@@ -55,7 +49,7 @@ char *reader_get_prm(reader_t *reader, int idx);
 bool parse_uint(char *ptr, uint *v);
 bool parse_byte(char *ptr, byte *v);
 bool parse_bool(char *ptr, bool *v);
-bool parse_ternary(char *ptr, prot_ternary_t *v);
+bool parse_ternary(char *ptr, ternary_t *v);
 
 // writer
 

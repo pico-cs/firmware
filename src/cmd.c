@@ -177,7 +177,7 @@ static cmd_rc_t cmd_loco_dir(cmd_t *cmd, int num_prm, reader_t *reader, writer_t
     if (!parse_uint(reader_get_prm(reader, 1), &addr)) return CMD_RC_INVPRM;
     if (!dcc_check_loco_addr(addr)) return CMD_RC_INVPRM;
 
-    prot_ternary_t ternary;
+    ternary_t value;
     bool dir;
     
     switch (num_prm) {
@@ -185,17 +185,17 @@ static cmd_rc_t cmd_loco_dir(cmd_t *cmd, int num_prm, reader_t *reader, writer_t
         if (!rbuf_get_dir(cmd->rbuf, addr, &dir)) return CMD_RC_NODATA;
         break;
     case 3:
-        if (!parse_ternary(reader_get_prm(reader, 2), &ternary)) return CMD_RC_INVPRM;
-        switch (ternary) {
-        case PROT_TERNARY_FALSE:
+        if (!parse_ternary(reader_get_prm(reader, 2), &value)) return CMD_RC_INVPRM;
+        switch (value) {
+        case TERNARY_FALSE:
             dir = false;
             if (!rbuf_set_dir(cmd->rbuf, addr, dir)) return CMD_RC_NOCHANGE;
             break;
-        case PROT_TERNARY_TRUE:
+        case TERNARY_TRUE:
             dir = true;
             if (!rbuf_set_dir(cmd->rbuf, addr, dir)) return CMD_RC_NOCHANGE;
             break;
-        case PROT_TERNARY_TOGGLE:
+        case TERNARY_TOGGLE:
             if (!rbuf_toggle_dir(cmd->rbuf, addr, &dir)) return CMD_RC_NODATA;
             break;
         }
@@ -240,7 +240,7 @@ static cmd_rc_t cmd_loco_fct(cmd_t *cmd, int num_prm, reader_t *reader, writer_t
     byte no;
     if (!parse_byte(reader_get_prm(reader, 2), &no)) return CMD_RC_INVPRM;
 
-    prot_ternary_t ternary;
+    ternary_t value;
     bool fct;
         
     switch (num_prm) {
@@ -248,17 +248,17 @@ static cmd_rc_t cmd_loco_fct(cmd_t *cmd, int num_prm, reader_t *reader, writer_t
         if (!rbuf_get_fct(cmd->rbuf, addr, no, &fct)) return CMD_RC_NODATA;
         break;
     case 4:
-        if (!parse_ternary(reader_get_prm(reader, 3), &ternary)) return CMD_RC_INVPRM;
-        switch (ternary) {
-        case PROT_TERNARY_FALSE:
+        if (!parse_ternary(reader_get_prm(reader, 3), &value)) return CMD_RC_INVPRM;
+        switch (value) {
+        case TERNARY_FALSE:
             fct = false;
             if (!rbuf_set_fct(cmd->rbuf, addr, no, fct)) return CMD_RC_NOCHANGE;
             break;
-        case PROT_TERNARY_TRUE:
+        case TERNARY_TRUE:
             fct = true;
             if (!rbuf_set_fct(cmd->rbuf, addr, no, fct)) return CMD_RC_NOCHANGE;
             break;
-        case PROT_TERNARY_TOGGLE:
+        case TERNARY_TOGGLE:
             if (!rbuf_toggle_fct(cmd->rbuf, addr, no, &fct)) return CMD_RC_NODATA;
             break;
         }
@@ -390,13 +390,13 @@ static cmd_rc_t cmd_io_cmdb(cmd_t *cmd, int num_prm, reader_t *reader, writer_t 
     if (!parse_uint(reader_get_prm(reader, 2), &gpio)) return CMD_RC_INVPRM;
     if (!io_is_gpio_avail(gpio)) return CMD_RC_INVGPIO;
 
-    bool value;
+    ternary_t value;
     if (num_prm == 4) {
-        if (!parse_bool(reader_get_prm(reader, 3), &value)) return CMD_RC_INVPRM;
+        if (!parse_ternary(reader_get_prm(reader, 3), &value)) return CMD_RC_INVPRM;
     }
 
-    value = io_exe_cmdb(io_cmd, gpio, value);
-    write_success(writer, "%c", value?prot_true:prot_false);
+    bool on = io_exe_cmdb(io_cmd, gpio, value);
+    write_success(writer, "%c", on?prot_true:prot_false);
     
     return CMD_RC_OK;
 }

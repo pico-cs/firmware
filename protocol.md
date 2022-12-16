@@ -125,15 +125,21 @@ The protocol is not strictly command->reply based as the command station might s
     - 4: pico temperature sensor
 
    ***
-#### iocmdb \<cmd\> \<gpio\> [t|f]
+#### iocmdb \<cmd\> \<gpio\> [t|f|~]
 
     Experimental!
 
     Executes a boolean GPIO command and returns the boolean value with cmd
     - 0: get GPIO value
     - 1: put GPIO value
+        t drives the GPIO high
+        f drives the GPIO low
+        ~ toggles the GPIO value
     - 2: get GPIO direction
     - 3: set GPIO direction (t is out and f is in)
+        t sets the direction to out
+        f sets the direction to in
+        ~ toggles the direction
     Allowed GPIO values are
     - 6..15, 20 and 21 
 

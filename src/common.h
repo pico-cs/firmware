@@ -4,7 +4,13 @@
 #include "pico/stdlib.h"
 
 typedef uint32_t word; // 32 bit words
-typedef uint8_t  byte; // and let's have a byte as well 
+typedef uint8_t  byte; // and let's have a byte as well
+
+typedef enum{
+	TERNARY_FALSE  = 0,
+	TERNARY_TRUE   = 1,
+	TERNARY_TOGGLE = 2,
+} ternary_t;
 
 // two byte addresses
 #define MSB(addr) (addr >> 8) & 0x3f

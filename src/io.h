@@ -23,6 +23,6 @@ void io_init();
 bool io_is_gpio_adc(uint gpio);
 bool io_is_gpio_avail(uint gpio);
 float io_adc_read(uint input);
-bool io_exe_cmdb(uint cmd, uint gpio, bool value);
+bool io_exe_cmdb(uint cmd, uint gpio, ternary_t value);
 
 #endif
