@@ -369,7 +369,7 @@ void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte c
 void dcc_cv29_bit5(dcc_t *dcc, byte msb, byte lsb, bool cv29_bit5) {
     // set cv29 bit 5 (switch short / long address)
     // val == false (bit == 0): use short address in cv1
-    // val == true  (bit == 1): use logn address in cv17 (msb) and cv18 (lsb)
+    // val == true  (bit == 1): use long address in cv17 (msb) and cv18 (lsb)
     //
     // command  0000-101D (d sets bit 5 of cv29)
 
@@ -417,11 +417,13 @@ void dcc_acc(dcc_t *dcc, byte msb, byte lsb, byte acc_out, bool acc_flag) {
     //       7 6   5 4 3 2   10 9 8     1 0
     // with A8, A9, A10 inverted by convention
 
-    dcc_send2(
-        dcc,
-        0x80 | (lsb >> 2),
-        0x80 | (acc_flag ? 0x08 : 0x00) | (((msb & 0x07) ^ 0x07) << 4) | ((lsb & 0x03) << 1) | (acc_out & 0x01)
-    );
+    for (int i = 0; i < DCC_REPEAT_NON_RBUF; i++) {
+        dcc_send2(
+            dcc,
+            0x80 | (lsb >> 2),
+            0x80 | (acc_flag ? 0x08 : 0x00) | (((msb & 0x07) ^ 0x07) << 4) | ((lsb & 0x03) << 1) | (acc_out & 0x01)
+        );
+    }
 }
 
 void dcc_acc_ext(dcc_t *dcc, byte msb, byte lsb, byte acc_status) {
@@ -431,10 +433,12 @@ void dcc_acc_ext(dcc_t *dcc, byte msb, byte lsb, byte acc_status) {
     //       7 6   5 4 3 2   10 9 8     1 0
     // with A8, A9, A10 inverted by convention
 
-    dcc_send3(
-        dcc,
-        0x80 | (lsb >> 2),
-        0x80 | (((msb & 0x07) ^ 0x07) << 4) | ((lsb & 0x03) << 1) | 0x01,
-        acc_status
-    );
+    for (int i = 0; i < DCC_REPEAT_NON_RBUF; i++) {
+        dcc_send3(
+            dcc,
+            0x80 | (lsb >> 2),
+            0x80 | (((msb & 0x07) ^ 0x07) << 4) | ((lsb & 0x03) << 1) | 0x01,
+            acc_status
+        );
+    }
 }
