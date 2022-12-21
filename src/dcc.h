@@ -25,6 +25,10 @@ bool dcc_check_cv_idx(uint idx);
 bool dcc_check_cv(byte cv);
 bool dcc_check_bit(byte bit); 
 
+bool dcc_check_acc_addr(uint addr);
+bool dcc_check_acc_out(byte out);
+bool dcc_check_acc_time(byte time);
+
 void dcc_init(dcc_t *dcc, putter fct, PIO pio, uint sm);
 uint dcc_set_sync_bits(dcc_t *dcc, uint sync_bits);
 uint dcc_get_sync_bits(dcc_t *dcc);
@@ -46,8 +50,10 @@ void dcc_f45_52(dcc_t *dcc, byte msb, byte lsb, byte f45_52);
 void dcc_f53_60(dcc_t *dcc, byte msb, byte lsb, byte f53_60);
 void dcc_f61_68(dcc_t *dcc, byte msb, byte lsb, byte f61_68);
 void dcc_cv_byte(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte val);
-void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte bit, bool flag);
+void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv_bit, bool cv_flag);
 void dcc_cv29_bit5(dcc_t *dcc, byte msb, byte lsb, bool cv29_bit5);
 void dcc_laddr(dcc_t *dcc, byte msb, byte lsb, byte new_msb, byte new_lsb);
+void dcc_acc(dcc_t *dcc, byte msb, byte lsb, byte acc_out, bool acc_flag);
+void dcc_acc_ext(dcc_t *dcc, byte msb, byte lsb, byte acc_status);
 
 #endif

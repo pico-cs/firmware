@@ -4,6 +4,7 @@ static const word WORD_CAP = sizeof(word) * 8;
 static const word ONES = 0xffffffff;
 
 static const int DCC_MAX_LOCO_ADDR     = 10239;
+static const int DCC_MAX_ACC_ADDR      =  4048;
 static const int DCC_MAX_LOCO_SPEED128 =   127;
 static const int DCC_MAX_CV_DIRECT     =  1024;
 
@@ -138,6 +139,18 @@ inline bool dcc_check_cv(byte cv) { // directly addressable cv byte value
 
 inline bool dcc_check_bit(byte bit) { // directly addressable cv bit position
     return ((bit >=0) && (bit < 8)); // bit position 0-7
+};
+
+inline bool dcc_check_acc_addr(uint addr) {
+    return ((addr >=0) && (addr < DCC_MAX_ACC_ADDR));
+};
+
+inline bool dcc_check_acc_out(byte out) {
+    return ((out == 0) || (out == 1));
+};
+
+inline bool dcc_check_acc_time(byte time) {
+    return (time <= 127);
 };
 
 void dcc_init(dcc_t *dcc, putter fct, PIO pio, uint sm) {
@@ -296,7 +309,7 @@ void dcc_f53_60(dcc_t *dcc, byte msb, byte lsb, byte f53_60) {
 }
 
 void dcc_f61_68(dcc_t *dcc, byte msb, byte lsb, byte f61_68) {
-    // command  1101-1100 DDDD-DDDD
+    // command 1101-1100 DDDD-DDDD
     if (msb == 0) {
         dcc_send3(dcc, lsb, 0xdc, f61_68);
     } else {
@@ -324,7 +337,7 @@ void dcc_cv_byte(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte 
     }
 }
 
-void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte bit, bool flag) {
+void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv_bit, bool cv_flag) {
     // operation mode (main track)
     // long config variable command
     //
@@ -346,9 +359,9 @@ void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte b
     // D   - bit value    (0|1)
     for (int i = 0; i < DCC_REPEAT_WRITE_CV; i++) {
         if (msb == 0) {
-            dcc_send4(dcc, lsb, 0xe8 | (cv_msb & 0x03) , cv_lsb, 0xf0 | (flag ? 0x08 : 0x00) | (bit & 0x07));
+            dcc_send4(dcc, lsb, 0xe8 | (cv_msb & 0x03) , cv_lsb, 0xf0 | (cv_flag ? 0x08 : 0x00) | (cv_bit & 0x07));
         } else {
-            dcc_send5(dcc, msb | 0xc0, lsb, 0xe8 | (cv_msb & 0x03), cv_lsb, 0xf0 | (flag ? 0x08 : 0x00) | (bit & 0x07));
+            dcc_send5(dcc, msb | 0xc0, lsb, 0xe8 | (cv_msb & 0x03), cv_lsb, 0xf0 | (cv_flag ? 0x08 : 0x00) | (cv_bit & 0x07));
         }
     }
 }
@@ -393,4 +406,35 @@ void dcc_laddr(dcc_t *dcc, byte msb, byte lsb, byte long_msb, byte long_lsb) {
             dcc_send5(dcc, msb | 0xc0, lsb, 0xf4, long_msb | 0xc0, long_lsb);
         }
     }
+}
+
+void dcc_acc(dcc_t *dcc, byte msb, byte lsb, byte acc_out, bool acc_flag) {
+    // command 10AA-AAAA 1AAA-CAAD
+    // C: flag on / off
+    // D: output (0 or 1)
+    // 11-bit address:
+    //   1 0 A A - A A A A  1 A A A - C A A D
+    //       7 6   5 4 3 2   10 9 8     1 0
+    // with A8, A9, A10 inverted by convention
+
+    dcc_send2(
+        dcc,
+        0x80 | (lsb >> 2),
+        0x80 | (acc_flag ? 0x08 : 0x00) | (((msb & 0x07) ^ 0x07) << 4) | ((lsb & 0x03) << 1) | (acc_out & 0x01)
+    );
+}
+
+void dcc_acc_ext(dcc_t *dcc, byte msb, byte lsb, byte acc_status) {
+    // command 10AA-AAAA 0AAA-0AA1 DDDD-DDDD
+    // 11-bit address:
+    //   1 0 A A - A A A A  0 A A A - 0 A A 1
+    //       7 6   5 4 3 2   10 9 8     1 0
+    // with A8, A9, A10 inverted by convention
+
+    dcc_send3(
+        dcc,
+        0x80 | (lsb >> 2),
+        0x80 | (((msb & 0x07) ^ 0x07) << 4) | ((lsb & 0x03) << 1) | 0x01,
+        acc_status
+    );
 }

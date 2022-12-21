@@ -7,7 +7,7 @@
 #include "channel.h"
 #include "prot.h"
 
-#define CMD_MAX_COMMAND 18
+#define CMD_MAX_COMMAND 21
 #define CMD_MAX_RV      10
 
 static const char* cmd_rvs[CMD_MAX_RV] = {
@@ -59,6 +59,9 @@ static const cmd_command_entry_t cmd_commands[CMD_MAX_COMMAND] = {
 	{"lcv29bit5", "<addr> t|f",             "loco set cv29 bit 5"},
 	{"lladdr",    "<addr> <laddr>",         "loco set long address"},
 	{"lcv1718",   "<addr>",                 "loco calculate cv17 cv18"},
+	{"af",        "<addr> 0|1 t|f",         "accessory function"},
+	{"at",        "<addr> 0|1 0..127",      "accessory time"},
+	{"as",        "<addr> 0..255",          "accessory status"},
 	{"ioadc",     "0..4",                   "io read adc input"},
 	{"iocmdb",    "<cmd> <gpio> [t|f]",     "io execute boolean gpio command"},
 };
@@ -85,8 +88,11 @@ typedef enum {
 	CMD_COMMAND_LOCO_CV29_BIT5 = 14,
 	CMD_COMMAND_LOCO_LADDR     = 15,
 	CMD_COMMAND_LOCO_CV1718    = 16,
-	CMD_COMMAND_IO_ADC         = 17,
-	CMD_COMMAND_IO_CMDB        = 18,
+	CMD_COMMAND_ACC_FCT        = 17,
+	CMD_COMMAND_ACC_TIME       = 18,
+	CMD_COMMAND_ACC_STATUS     = 19,
+	CMD_COMMAND_IO_ADC         = 20,
+	CMD_COMMAND_IO_CMDB        = 21,
 } cmd_command_t;
 
 typedef enum {

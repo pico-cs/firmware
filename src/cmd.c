@@ -367,6 +367,64 @@ static cmd_rc_t cmd_loco_cv1718(cmd_t *cmd, int num_prm, reader_t *reader, write
     return CMD_RC_OK;
 }
 
+static cmd_rc_t cmd_acc_fct(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
+    if (!cmd_check_num_prm(num_prm, 4, 4)) return CMD_RC_INVNUMPRM;
+
+    uint addr;
+    if (!parse_uint(reader_get_prm(reader, 1), &addr)) return CMD_RC_INVPRM;
+    if (!dcc_check_acc_addr(addr)) return CMD_RC_INVPRM;
+
+    byte out;
+    if (!parse_byte(reader_get_prm(reader, 2), &out)) return CMD_RC_INVPRM;
+    if (!dcc_check_acc_out(out)) return CMD_RC_INVPRM;
+
+    bool flag;
+    if (!parse_bool(reader_get_prm(reader, 3), &flag)) return CMD_RC_INVPRM;
+
+    channel_acc(cmd->channel, MSB(addr), LSB(addr), out, flag);
+
+    write_success(writer, "%c", flag?prot_true:prot_false);
+    return CMD_RC_OK;
+}
+
+static cmd_rc_t cmd_acc_time(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
+    if (!cmd_check_num_prm(num_prm, 4, 4)) return CMD_RC_INVNUMPRM;
+
+    uint addr;
+    if (!parse_uint(reader_get_prm(reader, 1), &addr)) return CMD_RC_INVPRM;
+    if (!dcc_check_acc_addr(addr)) return CMD_RC_INVPRM;
+
+    byte out;
+    if (!parse_byte(reader_get_prm(reader, 2), &out)) return CMD_RC_INVPRM;
+    if (!dcc_check_acc_out(out)) return CMD_RC_INVPRM;
+
+    byte time;
+    if (!parse_byte(reader_get_prm(reader, 3), &time)) return CMD_RC_INVPRM;
+    if (!dcc_check_acc_time(time)) return CMD_RC_INVPRM;
+
+    // TODO: explain
+    channel_acc_ext(cmd->channel, MSB(addr), LSB(addr), (out << 7) | time);
+
+    write_success(writer, "%d", time);
+    return CMD_RC_OK;
+}
+
+static cmd_rc_t cmd_acc_status(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
+    if (!cmd_check_num_prm(num_prm, 3, 3)) return CMD_RC_INVNUMPRM;
+
+    uint addr;
+    if (!parse_uint(reader_get_prm(reader, 1), &addr)) return CMD_RC_INVPRM;
+    if (!dcc_check_acc_addr(addr)) return CMD_RC_INVPRM;
+
+    byte status;
+    if (!parse_byte(reader_get_prm(reader, 2), &status)) return CMD_RC_INVPRM;
+    
+    channel_acc_ext(cmd->channel, MSB(addr), LSB(addr), status);
+
+    write_success(writer, "%d", status);
+    return CMD_RC_OK;
+}
+
 static cmd_rc_t cmd_io_adc(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
     if (!cmd_check_num_prm(num_prm, 2, 2)) return CMD_RC_INVNUMPRM;
     
@@ -425,6 +483,9 @@ void cmd_dispatch(cmd_t *cmd, reader_t *reader, writer_t *writer) {
     case CMD_COMMAND_LOCO_CV29_BIT5: rc = cmd_loco_cv29_bit5(cmd, num_prm, reader, writer); break;
     case CMD_COMMAND_LOCO_LADDR:     rc = cmd_loco_laddr(cmd, num_prm, reader, writer);     break;
     case CMD_COMMAND_LOCO_CV1718:    rc = cmd_loco_cv1718(cmd, num_prm, reader, writer);    break;
+    case CMD_COMMAND_ACC_FCT:        rc = cmd_acc_fct(cmd, num_prm, reader, writer);        break;
+    case CMD_COMMAND_ACC_TIME:       rc = cmd_acc_time(cmd, num_prm, reader, writer);       break;
+    case CMD_COMMAND_ACC_STATUS:     rc = cmd_acc_status(cmd, num_prm, reader, writer);     break;
     case CMD_COMMAND_IO_ADC:         rc = cmd_io_adc(cmd, num_prm, reader, writer);         break;
     case CMD_COMMAND_IO_CMDB:        rc = cmd_io_cmdb(cmd, num_prm, reader, writer);        break;
     default:                         rc = CMD_RC_NOTIMPL;                                   break;

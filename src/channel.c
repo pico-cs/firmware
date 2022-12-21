@@ -134,14 +134,14 @@ void channel_cv_byte(channel_t *channel, byte msb, byte lsb, byte cv_msb, byte c
     queue_add_blocking(&channel->qin, &channel->in);
 }
 
-void channel_cv_bit(channel_t *channel, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte bit, bool flag) {
+void channel_cv_bit(channel_t *channel, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv_bit, bool cv_flag) {
     channel->in.cmd = CHANNEL_CMD_CV_BIT;
     channel->in.msb = msb;
     channel->in.lsb = lsb;
     channel->in.cv_msb = cv_msb;
     channel->in.cv_lsb = cv_lsb;
-    channel->in.bit = bit;
-    channel->in.flag = flag;
+    channel->in.cv_bit = cv_bit;
+    channel->in.cv_flag = cv_flag;
     queue_add_blocking(&channel->qin, &channel->in);
 }
 
@@ -161,6 +161,22 @@ void channel_laddr(channel_t *channel, byte msb, byte lsb, byte long_msb, byte l
     channel->in.long_lsb = long_lsb;
     queue_add_blocking(&channel->qin, &channel->in);
 }
+void channel_acc(channel_t *channel, byte msb, byte lsb, byte acc_out, bool acc_flag) {
+    channel->in.cmd = CHANNEL_CMD_ACC;
+    channel->in.msb = msb;
+    channel->in.lsb = lsb;
+    channel->in.acc_out = acc_out;
+    channel->in.acc_flag = acc_flag;
+    queue_add_blocking(&channel->qin, &channel->in);
+};
+
+void channel_acc_ext(channel_t *channel, byte msb, byte lsb, byte acc_status) {
+    channel->in.cmd = CHANNEL_CMD_ACC_EXT;
+    channel->in.msb = msb;
+    channel->in.lsb = lsb;
+    channel->in.acc_status = acc_status;
+    queue_add_blocking(&channel->qin, &channel->in);
+};
 
 bool channel_try_remove_qin(channel_t *channel, channel_in_t *in) {
     return queue_try_remove(&channel->qin, in);

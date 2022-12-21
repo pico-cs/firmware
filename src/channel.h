@@ -29,6 +29,9 @@ static const byte CHANNEL_CMD_CV_BIT            = CHANNEL_DCC | 0x0d;
 static const byte CHANNEL_CMD_CV29_BIT5         = CHANNEL_DCC | 0x0e;
 static const byte CHANNEL_CMD_LADDR             = CHANNEL_DCC | 0x0f;
 
+static const byte CHANNEL_CMD_ACC               = CHANNEL_DCC | 0x10;
+static const byte CHANNEL_CMD_ACC_EXT           = CHANNEL_DCC | 0x11;
+
 typedef struct {
     byte cmd;
     union {
@@ -55,8 +58,8 @@ typedef struct {
                     union {
                         byte cv;
                         struct {
-                            byte bit;
-                            bool flag;
+                            byte cv_bit;
+                            bool cv_flag;
                         };
                     };
                 };
@@ -65,6 +68,11 @@ typedef struct {
                     byte long_msb;
                     byte long_lsb;
                 };
+                struct {
+                    byte acc_out;
+                    bool acc_flag;
+                };
+                byte acc_status;
             };
         };
     };
@@ -105,9 +113,12 @@ void channel_f45_52(channel_t *channel, byte msb, byte lsb, byte f45_52);
 void channel_f53_60(channel_t *channel, byte msb, byte lsb, byte f53_60);
 void channel_f61_68(channel_t *channel, byte msb, byte lsb, byte f61_68);
 void channel_cv_byte(channel_t *channel, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv);
-void channel_cv_bit(channel_t *channel, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte bit, bool flag);
+void channel_cv_bit(channel_t *channel, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv_bit, bool cv_flag);
 void channel_cv29_bit5(channel_t *channel, byte msb, byte lsb, bool cv29_bit5);
 void channel_laddr(channel_t *channel, byte msb, byte lsb, byte new_msb, byte new_lsb);
+
+void channel_acc(channel_t *channel, byte msb, byte lsb, byte acc_out, bool acc_flag);
+void channel_acc_ext(channel_t *channel, byte msb, byte lsb, byte acc_status);
 
 bool channel_try_remove_qin(channel_t *channel, channel_in_t *in);
 void channel_remove_blocking_qin(channel_t *channel, channel_in_t *in);

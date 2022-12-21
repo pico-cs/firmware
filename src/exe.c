@@ -13,21 +13,23 @@ static const uint EXE_DEFAULT_SM = 0;
 
 static void exe_dcc(exe_t *exe, channel_in_t *in) {
     switch (in->cmd) {
-    case CHANNEL_CMD_DIR_SPEED: dcc_dir_speed(&exe->dcc, in->msb, in->lsb, in->dir_speed);                          break;
-    case CHANNEL_CMD_F0_4:      dcc_f0_4(&exe->dcc, in->msb, in->lsb, in->f0_4);                                    break;
-    case CHANNEL_CMD_F5_8:      dcc_f5_8(&exe->dcc, in->msb, in->lsb, in->f5_8);                                    break;
-    case CHANNEL_CMD_F9_12:     dcc_f9_12(&exe->dcc, in->msb, in->lsb, in->f9_12);                                  break;
-    case CHANNEL_CMD_F13_20:    dcc_f13_20(&exe->dcc, in->msb, in->lsb, in->f13_20);                                break;
-    case CHANNEL_CMD_F21_28:    dcc_f21_28(&exe->dcc, in->msb, in->lsb, in->f21_28);                                break;
-    case CHANNEL_CMD_F29_36:    dcc_f29_36(&exe->dcc, in->msb, in->lsb, in->f29_36);                                break;
-    case CHANNEL_CMD_F37_44:    dcc_f37_44(&exe->dcc, in->msb, in->lsb, in->f37_44);                                break;
-    case CHANNEL_CMD_F45_52:    dcc_f45_52(&exe->dcc, in->msb, in->lsb, in->f45_52);                                break;
-    case CHANNEL_CMD_F53_60:    dcc_f53_60(&exe->dcc, in->msb, in->lsb, in->f53_60);                                break;
-    case CHANNEL_CMD_F61_68:    dcc_f61_68(&exe->dcc, in->msb, in->lsb, in->f61_68);                                break;
-    case CHANNEL_CMD_CV_BYTE:   dcc_cv_byte(&exe->dcc, in->msb, in->lsb, in->cv_msb, in->cv_lsb, in->cv);           break;
-    case CHANNEL_CMD_CV_BIT:    dcc_cv_bit(&exe->dcc, in->msb, in->lsb, in->cv_msb, in->cv_lsb, in->bit, in->flag); break;
-    case CHANNEL_CMD_CV29_BIT5: dcc_cv29_bit5(&exe->dcc, in->msb, in->lsb, in->cv29_bit5);                          break;
-    case CHANNEL_CMD_LADDR:     dcc_laddr(&exe->dcc, in->msb, in->lsb, in->long_msb, in->long_lsb);                 break;
+    case CHANNEL_CMD_DIR_SPEED: dcc_dir_speed(&exe->dcc, in->msb, in->lsb, in->dir_speed);                                break;
+    case CHANNEL_CMD_F0_4:      dcc_f0_4(&exe->dcc, in->msb, in->lsb, in->f0_4);                                          break;
+    case CHANNEL_CMD_F5_8:      dcc_f5_8(&exe->dcc, in->msb, in->lsb, in->f5_8);                                          break;
+    case CHANNEL_CMD_F9_12:     dcc_f9_12(&exe->dcc, in->msb, in->lsb, in->f9_12);                                        break;
+    case CHANNEL_CMD_F13_20:    dcc_f13_20(&exe->dcc, in->msb, in->lsb, in->f13_20);                                      break;
+    case CHANNEL_CMD_F21_28:    dcc_f21_28(&exe->dcc, in->msb, in->lsb, in->f21_28);                                      break;
+    case CHANNEL_CMD_F29_36:    dcc_f29_36(&exe->dcc, in->msb, in->lsb, in->f29_36);                                      break;
+    case CHANNEL_CMD_F37_44:    dcc_f37_44(&exe->dcc, in->msb, in->lsb, in->f37_44);                                      break;
+    case CHANNEL_CMD_F45_52:    dcc_f45_52(&exe->dcc, in->msb, in->lsb, in->f45_52);                                      break;
+    case CHANNEL_CMD_F53_60:    dcc_f53_60(&exe->dcc, in->msb, in->lsb, in->f53_60);                                      break;
+    case CHANNEL_CMD_F61_68:    dcc_f61_68(&exe->dcc, in->msb, in->lsb, in->f61_68);                                      break;
+    case CHANNEL_CMD_CV_BYTE:   dcc_cv_byte(&exe->dcc, in->msb, in->lsb, in->cv_msb, in->cv_lsb, in->cv);                 break;
+    case CHANNEL_CMD_CV_BIT:    dcc_cv_bit(&exe->dcc, in->msb, in->lsb, in->cv_msb, in->cv_lsb, in->cv_bit, in->cv_flag); break;
+    case CHANNEL_CMD_CV29_BIT5: dcc_cv29_bit5(&exe->dcc, in->msb, in->lsb, in->cv29_bit5);                                break;
+    case CHANNEL_CMD_LADDR:     dcc_laddr(&exe->dcc, in->msb, in->lsb, in->long_msb, in->long_lsb);                       break;
+    case CHANNEL_CMD_ACC:       dcc_acc(&exe->dcc, in->msb, in->lsb, in->acc_out, in->acc_flag);                          break;
+    case CHANNEL_CMD_ACC_EXT:   dcc_acc_ext(&exe->dcc, in->msb, in->lsb, in->acc_status);                                 break;
     }
 }
 
@@ -149,6 +151,8 @@ void exe_dispatch(exe_t *exe) {
         if (exe->enabled) {
             exe_dispatch_enabled(exe);
          } else {
+            //TODO: service track
+            //printf("tx queue entries %d\n", pio_sm_get_tx_fifo_level(pio0, 0));
             exe_dispatch_disabled(exe);
         }
     }

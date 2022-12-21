@@ -115,6 +115,36 @@ The protocol is not strictly command->reply based as the command station might s
     Returns the value ov CV 17 and CV 18 of loco with address \<addr\>.
 
    ***
+#### af \<addr\> 0|1 t|f
+
+    Experimental!
+
+    Sets one of the paired outputs of a simple accessory decoder to active or inactive where
+    - addr is the '11-bit' DCC accessory decoder address in the range of 0..4047 with 4044-4047 as NMRA broadcast address
+    - 0|1 determines one of the paired outputs and
+    - t|f activates respectively deactivates the output
+
+   ***
+#### at \<addr\> 0|1 0..127
+
+    Experimental!
+
+    Sets the activation time for one of the paired outputs of a simple accessory decoder (if supported) where
+    - addr is the '11-bit' DCC accessory decoder address in the range of 0..4047 with 4044-4047 as NMRA broadcast address
+    - 0|1 determines one of the paired outputs and
+    - 0..127 is the activation time in 100 millisecond steps with
+      - 0 deactivating the output and
+      - 127 activating the output permanently
+
+   ***
+#### as \<addr\> 0...255
+
+    Experimental!
+
+    Sets the data byte for an extended accessory decoder like transmitting aspect control to a signal decoder where
+    - addr is the '11-bit' DCC accessory decoder address in the range of 0..4047 with 4047 as broadcast address
+
+   ***
 #### ioadc 0..4
 
     Returns the 'raw' value (assume ADC_VREF == 3.3 V) of the ADC input with
