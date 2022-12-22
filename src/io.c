@@ -117,17 +117,6 @@ uint io_get_gpio_flags() {
     return (flags & io_gpio_avail); // filter against available gpio
 }
 
-uint io_get_gpio_status(uint flags) {
-    uint status = 0;
-    for (uint i = 0; i < IO_NUM; i++) {
-        uint mask = (1 << i);
-        if ((flags & mask) && !gpio_get_dir(i)) { // gpio changed and input
-            if (gpio_get(i)) status |= mask;
-        }
-    }
-    return status;
-}
-
 void io_write_gpio_input_event(writer_t *writer, uint flags) {
     for (uint i = 0; i < IO_NUM; i++) {
         uint mask = (1 << i);
