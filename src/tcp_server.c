@@ -121,6 +121,7 @@ static err_t tcp_server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err)
 }
 
 void tcp_server_init(tcp_server_t *server, writer_t *logger) {
+    server->client_pcb = NULL;
     server->recv_len = 0;
     server->port = TCP_PORT;
     server->logger = logger;
@@ -163,6 +164,11 @@ bool tcp_server_open(tcp_server_t *server) {
 int tcp_server_write(void *obj, const byte buf[], int size) {
     tcp_server_t *server = (tcp_server_t*)obj;
 
+    if (!server->client_pcb) {
+        write_event(server->logger, "tcp: no client connected");
+        return 0;
+    }
+
     // debug
     // write_eventf(server->logger, "tcp: writing %d bytes to client", size);
     cyw43_arch_lwip_begin();
@@ -171,6 +177,7 @@ int tcp_server_write(void *obj, const byte buf[], int size) {
         write_eventf(server->logger, "tcp: failed to write data %d", err);
         // TODO: by when do we close the connection ????;
     }
+    tcp_output(server->client_pcb);
     cyw43_arch_lwip_end();
     // TODO: error or n - return ERR_OK;
     return size;

@@ -2,6 +2,7 @@
 #define _IO_H
 
 #include "common.h"
+#include "prot.h"
 
 typedef enum {
     IO_ADC_INPUT_VSYS =  3, // ADC GP29 (pico VSYS/3, pico_w ~0)
@@ -28,5 +29,7 @@ bool io_is_gpio_adc(uint gpio);
 bool io_is_gpio_avail(uint gpio);
 float io_adc_read(uint input);
 bool io_exe_cmdb(uint cmd, uint gpio, ternary_t value);
+uint io_get_gpio_flags();
+void io_write_gpio_input_event(writer_t *writer, uint flags);
 
 #endif

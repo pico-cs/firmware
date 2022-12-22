@@ -5,6 +5,44 @@
 
 #include "dcc_tx.pio.h"
 
+/*
+TODO
+- exe -> main mt / service st track
+- configurtion of dcc repeats
+- separation of config and command queue commands
+- replace switch by function array (see below)
+- remove blocking cs enable wait in case of track is disabled
+- ...
+---
+typedef void (*configer)(exe_t *exe, mt_cfg_t *cfg);
+typedef void (*commander)(exe_t *exe, mt_cmd_t *cmd);
+
+static const configer cfg_fn[] = {
+    exe_get_num_sync_bit,
+    exe_set_num_sync_bit,
+    exe_get_enabled,
+    exe_set_enabled,
+};
+
+bool mt_dispatch(channel_t *channel, exe_t *exe) {
+    mt_cfg_t cfg;
+    mt_cmd_t cmd;
+    
+    // configuration
+    if queue_try_remove(&channel->cfg_queue, &cfg) {
+        // TODO check boundaries
+        cfg_fn[cfg.cmd](exe, &cfg);
+    }
+    
+    // command
+    bool rv = queue_try_remove(&channel->cmd_queue, &cmd) {
+        // TODO check boundaries
+        cmd_fn[cmd.cmd](exe, &cmd);
+    }
+    return rv;
+}
+*/
+
 static const uint EXE_DEFAULT_TX_PIN      =  2;
 static const uint EXE_DEFAULT_TX_INV_PIN  =  EXE_DEFAULT_TX_PIN + 1;
 static const uint EXE_DEFAULT_ENABLED_PIN = 22;

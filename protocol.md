@@ -12,6 +12,39 @@ For communication with the Raspberry PI Pico a simple human readable text protoc
 
 The protocol is not strictly command->reply based as the command station might send push messages at any time. But it is guaranteed that replies are send in command order and that push messages are not send in between multi message replies.
 
+### Push messages
+
+   ***
+#### Info messages 
+
+    Some of the push messages are info messages provided to the USB over serial connection only.
+
+    Examples:
+
+    !wifi: failed to connect
+    !wifi: connecting...
+    !wifi: connected
+    !tcp: starting server host [...]
+
+   ***
+#### GPIO input event messages
+
+    Experimental!
+
+    Event id: ioie
+
+    For the free available GPIO inputs an event is raised in case the status of the GPIO has changed. The event returns the GPIO number and the value where 
+    - t represents a high and
+    - f a low level
+
+    Between two events there can be more than one status change for a single GPIO so that the value of the GPIO input might be equal to the value of the last event for the same GPIO.
+
+    Example:
+
+    !ioie: 5 t
+
+    Status change of GPIO number 5 with a high level value
+
 ### Currently the following commands are supported:
 
    ***

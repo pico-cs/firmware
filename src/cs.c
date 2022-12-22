@@ -11,7 +11,7 @@
 #include "channel.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.4.2"
+#define PROGRAM_VERSION     "v0.5.0"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
@@ -41,18 +41,18 @@ int main() {
     // first guarantee that usb connection is up. 
     stdio_init_all();
 
-    reader_t reader_usb;
-    reader_init(&reader_usb);
+    reader_t usb_reader;
+    reader_init(&usb_reader);
     
-    writer_t writer_usb;
-    writer_init(&writer_usb, NULL, &usb_write);
+    writer_t usb_writer;
+    writer_init(&usb_writer, NULL, &usb_write);
 
     // init io before board
     io_init();
 
     // then init board
     board_t board;
-    if (!board_init(&board, &writer_usb)) {
+    if (!board_init(&board, &usb_writer)) {
         return -1;
     }
 
@@ -69,7 +69,7 @@ int main() {
     bool enabled = channel_get_enabled(&channel);
     board_set_led(&board, enabled);
     
-    loop(&cmd, &reader_usb, &writer_usb);
+    loop(&cmd, &usb_reader, &usb_writer);
 
     board_deinit(&board);
 }

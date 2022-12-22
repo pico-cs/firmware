@@ -3,10 +3,12 @@
 #include "tcp_server.h"
 #include "pico/cyw43_arch.h"
 
-void loop(cmd_t *cmd, reader_t *reader_usb, writer_t *writer_usb) {
+#include "io.h"
+
+void loop(cmd_t *cmd, reader_t *usb_reader, writer_t *usb_writer) {
 
     tcp_server_t server;
-    tcp_server_init(&server, writer_usb);
+    tcp_server_init(&server, usb_writer);
     tcp_server_open(&server);
 
     writer_t tcp_writer;
@@ -29,10 +31,16 @@ void loop(cmd_t *cmd, reader_t *reader_usb, writer_t *writer_usb) {
         
         int n = usb_read(usb_buf, PROT_BUFFER_SIZE, 10);
         
-        if (reader_read_frame(reader_usb, usb_buf, n)) {
-            cmd_dispatch(cmd, reader_usb, writer_usb);
-            reader_reset(reader_usb);
-        } 
+        if (reader_read_frame(usb_reader, usb_buf, n)) {
+            cmd_dispatch(cmd, usb_reader, usb_writer);
+            reader_reset(usb_reader);
+        }
+
+        uint flags = io_get_gpio_flags();
+        if (flags) {
+            io_write_gpio_input_event(usb_writer, flags);
+            if (server.client_pcb) io_write_gpio_input_event(&tcp_writer, flags);
+        }
 
         //sleep_us(100);
     }

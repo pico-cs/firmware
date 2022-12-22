@@ -1,6 +1,10 @@
+
 #include "hardware/adc.h"
+#include "pico/critical_section.h"
 
 #include "io.h"
+
+#include "pico/printf.h"
 
 /* GPIOs
 - GPIO0:           reserved: UART0 TX (default)
@@ -25,9 +29,9 @@
 - GPIO29:          ADC: ADC3 / PICO internal use
 */
 
-static uint32_t io_gpio_adc = 1 << 26 | 1 << 27 | 1 << 28 | 1 << 29;
+static uint io_gpio_adc = 1 << 26 | 1 << 27 | 1 << 28 | 1 << 29;
 
-static uint32_t io_gpio_avail =
+static uint io_gpio_avail =
     1 << 6 | 1 << 7 | 1 << 8 | 1 << 9 | 1 << 10 | 1 << 11 | 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 20 | 1 << 21;
 
 // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
@@ -96,11 +100,62 @@ bool io_exe_cmdb(uint cmd, uint gpio, ternary_t value) {
     }
 }
 
+// gpio callback
+static critical_section_t gpio_callback_lock;
+static volatile uint gpio_flags = 0;
+
+static void gpio_callback(uint gpio, uint32_t events) {
+    gpio_flags |= (1 << gpio); // flag change
+}
+
+uint io_get_gpio_flags() {
+    uint flags;
+    critical_section_enter_blocking(&gpio_callback_lock);
+    flags = gpio_flags;
+    gpio_flags = 0;
+    critical_section_exit(&gpio_callback_lock);
+    return (flags & io_gpio_avail); // filter against available gpio
+}
+
+uint io_get_gpio_status(uint flags) {
+    uint status = 0;
+    for (uint i = 0; i < IO_NUM; i++) {
+        uint mask = (1 << i);
+        if ((flags & mask) && !gpio_get_dir(i)) { // gpio changed and input
+            if (gpio_get(i)) status |= mask;
+        }
+    }
+    return status;
+}
+
+void io_write_gpio_input_event(writer_t *writer, uint flags) {
+    for (uint i = 0; i < IO_NUM; i++) {
+        uint mask = (1 << i);
+        if (flags & mask) {
+            write_eventf(writer, "ioie: %d %c", i, gpio_get(i)?prot_true:prot_false);
+        }
+    }
+}
+
 void io_init() {
+    critical_section_init(&gpio_callback_lock);     // init gpio callback lock
     adc_init();                                     // configure adc
+    bool first = true;
+    // uint32_t event_mask = GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL | GPIO_IRQ_LEVEL_LOW | GPIO_IRQ_LEVEL_HIGH;
+    uint32_t event_mask = GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL;
+    // | GPIO_IRQ_LEVEL_LOW | GPIO_IRQ_LEVEL_HIGH;
+    
     for (uint i = 0; i < IO_NUM; i++) {
         if (io_is_gpio_adc(i))   adc_gpio_init(i);  // init adc gpio
-        if (io_is_gpio_avail(i)) gpio_init(i);      // init gpio
+        if (io_is_gpio_avail(i)) {
+            gpio_init(i);                           // init gpio
+            if (first) {                            // enable gpio interrupt
+                gpio_set_irq_enabled_with_callback(i, event_mask, true, &gpio_callback);
+                first = false;
+            } else {
+                gpio_set_irq_enabled(i, event_mask, true);
+            }
+        }
     }
     adc_set_temp_sensor_enabled(true); // enable temperature sensor
 }

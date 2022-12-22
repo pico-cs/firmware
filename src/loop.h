@@ -5,6 +5,6 @@
 #include "prot.h"
 #include "cmd.h"
 
-void loop(cmd_t *cmd, reader_t *reader_usb, writer_t *writer_usb);
+void loop(cmd_t *cmd, reader_t *usb_reader, writer_t *usb_writer);
 
 #endif
