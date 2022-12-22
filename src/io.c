@@ -52,11 +52,13 @@ float io_adc_read(uint input) {
 bool io_exe_cmdb(uint cmd, uint gpio, ternary_t value) {
     if (!io_is_gpio_avail(gpio)) return false;
 
-    bool b;
+    bool b, pull_up, pull_down;
 
     switch (cmd) {
-    case IO_CMD_GET:     return gpio_get(gpio);
-    case IO_CMD_GET_DIR: return gpio_get_dir(gpio);
+    case IO_CMD_GET:           return gpio_get(gpio);
+    case IO_CMD_GET_DIR:       return gpio_get_dir(gpio);
+    case IO_CMD_GET_PULL_DOWN: return gpio_is_pulled_down(gpio);
+    case IO_CMD_GET_PULL_UP:   return gpio_is_pulled_up(gpio);
     case IO_CMD_PUT:
         switch (value) {
         case TERNARY_FALSE:  gpio_put(gpio, false); return false;
@@ -71,6 +73,26 @@ bool io_exe_cmdb(uint cmd, uint gpio, ternary_t value) {
         case TERNARY_TOGGLE: b = !gpio_get_dir(gpio); gpio_set_dir(gpio, b); return b;
         default:             return false; // should never happen
         }
+    case IO_CMD_SET_PULL_UP:
+        pull_up   = gpio_is_pulled_up(gpio);
+        pull_down = gpio_is_pulled_down(gpio);
+        switch (value) {
+        case TERNARY_FALSE:  pull_up = false;    break;
+        case TERNARY_TRUE:   pull_up = true;     break;
+        case TERNARY_TOGGLE: pull_up = !pull_up; break;
+        }
+        gpio_set_pulls(gpio, pull_up, pull_down);
+        return pull_up;
+    case IO_CMD_SET_PULL_DOWN:
+        pull_up   = gpio_is_pulled_up(gpio);
+        pull_down = gpio_is_pulled_down(gpio);
+        switch (value) {
+        case TERNARY_FALSE:  pull_down = false;      break;
+        case TERNARY_TRUE:   pull_down = true;       break;
+        case TERNARY_TOGGLE: pull_down = !pull_down; break;
+        }
+        gpio_set_pulls(gpio, pull_up, pull_down);
+        return pull_down;
     }
 }
 

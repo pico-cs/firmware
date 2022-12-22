@@ -170,6 +170,16 @@ The protocol is not strictly command->reply based as the command station might s
         t sets the direction to out
         f sets the direction to in
         ~ toggles the direction
+    - 4: get GPIO pull up state
+    - 5: set GPIO pull up
+        t enabled pull up
+        f disables pull up
+        ~ toggles pull up
+    - 6: get GPIO pull down state
+    - 7: set GPIO pull down
+        t enabled pull down
+        f disables pull down
+        ~ toggles pull down
     Allowed GPIO values are
     - 6..15, 20 and 21 
 

@@ -11,11 +11,15 @@ typedef enum {
 } io_adc_input_t;
 
 typedef enum {
-    IO_CMD_GET     = 0,
-    IO_CMD_PUT     = 1,
-    IO_CMD_GET_DIR = 2,
-    IO_CMD_SET_DIR = 3,
-    IO_NUM_CMD     = 4,
+    IO_CMD_GET           = 0,
+    IO_CMD_PUT           = 1,
+    IO_CMD_GET_DIR       = 2,
+    IO_CMD_SET_DIR       = 3,
+    IO_CMD_GET_PULL_UP   = 4,
+    IO_CMD_SET_PULL_UP   = 5,
+    IO_CMD_GET_PULL_DOWN = 6,
+    IO_CMD_SET_PULL_DOWN = 7,
+    IO_NUM_CMD           = 8,
 } io_cmd_t;
 
 // public interface
