@@ -33,17 +33,17 @@ The protocol is not strictly command->reply based as the command station might s
 
     Event id: ioie
 
-    For the free available GPIO inputs an event is raised in case the status of the GPIO has changed. The event returns the GPIO number and the value where 
+    For the free available GPIO inputs an event is raised in case the state of the GPIO has changed. The event returns the GPIO number and the value where 
     - t represents a high and
     - f a low level
 
-    Between two events there can be more than one status change for a single GPIO so that the value of the GPIO input might be equal to the value of the last event for the same GPIO.
+    Between two events there can be more than one state changes for a single GPIO so that the value of the GPIO input might be equal to the value of the last event for the same GPIO.
 
     Example:
 
     !ioie: 5 t
 
-    Status change of GPIO number 5 with a high level value
+    State change(s) of GPIO number 5 with a final high level value
 
 ### Currently the following commands are supported:
 
