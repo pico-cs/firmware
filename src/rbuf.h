@@ -7,7 +7,7 @@
 #include "common.h"
 #include "channel.h"
 
-#define RBUF_NUM_ENTRY 128  // lines in refresh buffer
+//#define RBUF_NUM_ENTRY 127  // lines in refresh buffer
 
 typedef union {
     uint64_t f5_68;
@@ -32,8 +32,8 @@ typedef union {
 typedef struct {
     volatile byte msb;
     volatile byte lsb;
-    volatile byte num_refresh_cycle;
-    volatile byte refresh_cycle; 
+    volatile byte max_refresh_cmd;
+    volatile byte refresh_cmd; 
     volatile byte dir_speed;
     volatile byte f0_4;
     volatile f5_68_t f5_68;
@@ -43,15 +43,16 @@ typedef struct {
 
 typedef struct {
     mutex_t mu;
-    channel_t *channel;
-    volatile int8_t first, next;
-    volatile rbuf_entry_t buf[RBUF_NUM_ENTRY];
+    cmdch_t *cmdch;
+    volatile int first, next;
+    volatile rbuf_entry_t buf[RBUF_SIZE]; // RBUF_SIZE set by cmake
 } rbuf_t; // refresh buffer
 
 // public interface
-void rbuf_init(rbuf_t *rbuf, channel_t *channel);
+void rbuf_init(rbuf_t *rbuf, cmdch_t *cmdch);
 
-bool rbuf_deregister(rbuf_t *rbuf, uint addr);
+void rbuf_reset(rbuf_t *rbuf);
+bool rbuf_del(rbuf_t *rbuf, uint addr);
 
 bool rbuf_get_dir(rbuf_t *rbuf, uint addr, bool *dir);
 bool rbuf_set_dir(rbuf_t *rbuf, uint addr, bool dir);
@@ -64,6 +65,6 @@ bool rbuf_get_fct(rbuf_t *rbuf, uint addr, byte no, bool *fct);
 bool rbuf_set_fct(rbuf_t *rbuf, uint addr, byte no, bool fct);
 bool rbuf_toggle_fct(rbuf_t *rbuf, uint addr, byte no, bool *fct);
 
-bool rbuf_try_get_next(rbuf_t *rbuf, rbuf_entry_t *entry);
+bool rbuf_refresh(rbuf_t *rbuf, bool *one_entry, cmdch_in_t *cmdch);
 
 #endif

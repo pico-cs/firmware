@@ -5,6 +5,32 @@ include(pico_sdk_import.cmake)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+set(PICO_CS_DEFAULT_RBUF_SIZE 128)
+    
+if (DEFINED ENV{PICO_CS_RBUF_SIZE} AND (NOT PICO_CS_RBUF_SIZE))
+    set(PICO_CS_RBUF_SIZE $ENV{PICO_CS_RBUF_SIZE})
+    message("Using PICO_CS_RUF_SIZE from environment ('${PICO_CS_RBUF_SIZE}')")
+endif()
+
+if (NOT PICO_CS_RBUF_SIZE)
+    set(PICO_CS_RBUF_SIZE ${PICO_CS_DEFAULT_RBUF_SIZE})
+    message("Using PICO_CS_RBUF_SIZE default ('${PICO_CS_DEFAULT_RBUF_SIZE}')")
+endif()
+
+if (PICO_CS_RBUF_SIZE LESS 64)
+    message(
+        FATAL_ERROR
+        "Refresh buffer size minimum is 64. Please use valid PICO_CS_RBUF_SIZE value between 64 and 255."
+    )
+endif()
+
+if (PICO_CS_RBUF_SIZE GREATER 255)
+    message(
+        FATAL_ERROR
+        "Refresh buffer size maximum is 255. Please use valid PICO_CS_RBUF_SIZE value between 64 and 255."
+    )
+endif()
+
 if (PICO_BOARD STREQUAL "pico")
     project(cs C CXX ASM)
     pico_sdk_init()
@@ -18,7 +44,7 @@ if (PICO_BOARD STREQUAL "pico")
         loop_pico.c
         io.c
         cmd.c
-        exe.c
+        mt.c
         dcc.c
         rbuf.c
         channel.c
@@ -26,6 +52,8 @@ if (PICO_BOARD STREQUAL "pico")
 
     target_compile_definitions(cs PRIVATE
         PICO_W=0
+        RBUF_SIZE=${PICO_CS_RBUF_SIZE}
+        RBUF_SIZE_STRING=\"${PICO_CS_RBUF_SIZE}\"
     )
 
     pico_generate_pio_header(cs ${CMAKE_CURRENT_LIST_DIR}/dcc_tx.pio)
@@ -95,7 +123,7 @@ if (PICO_BOARD STREQUAL "pico_w")
         tcp_server.c
         io.c
         cmd.c
-        exe.c
+        mt.c
         dcc.c
         rbuf.c
         channel.c
@@ -103,6 +131,8 @@ if (PICO_BOARD STREQUAL "pico_w")
 
     target_compile_definitions(cs_w PRIVATE
         PICO_W=1
+        RBUF_SIZE=${PICO_CS_RBUF_SIZE}
+        RBUF_SIZE_STRING=\"${PICO_CS_RBUF_SIZE}\"
         WIFI_SSID=\"${PICO_CS_WIFI_SSID}\"
         WIFI_PASSWORD=\"${PICO_CS_WIFI_PASSWORD}\"
         TCP_PORT=${PICO_CS_TCP_PORT}

@@ -73,31 +73,27 @@ The protocol is not strictly command->reply based as the command station might s
     Returns the value of the internal temperature sensor.
 
    ***
-#### cs [\<bits\>]
+#### mte [t|f]
 
-    Returns or sets the number of DCC sync bits \<bits\>.
-
-   ***
-#### ce [t|f]
-
-    Returns or sets the command station output where
-    - t enables the DCC output of the commend station and
-    - f disables the DCC output.
+    Returns or sets the main track output where
+    - t enables the output and
+    - f disables the output.
 
    ***
-#### cr
+#### mtcv 0..3 [0..255]
 
-    Returns the content of the internal refresh buffer (for debugging purposes only).
+    Returns or sets a main track CV variable via index.
 
-   ***
-#### cd \<addr\>
-
-    Deletes the loco with address \<addr\> from the internal refresh buffer (for debugging purposes only).
+    Currently the following CV indexes are supported:
+    - 0: number of DCC synchronization bits:          17..32 default: 17
+    - 1: number of DCC decoder command repetition:     1.. 5 default:  1
+    - 2: number of DCC CV command repetitions:         2.. 5 default:  2
+    - 3: number of DCC accessory decoder repetitions:  1.. 5 default:  2.
 
    ***
 #### ld \<addr\> [t|f|~]
 
-    Returns or sets the direction of loco with address \<addr\> where
+    Returns or sets the direction of loco with address <addr> where
     - t is forward
     - f is backward and
     - ~ toggles the direction.
@@ -105,7 +101,7 @@ The protocol is not strictly command->reply based as the command station might s
    ***
 #### ls \<addr\> [0..127]
 
-    Return or sets the speed of loco with address \<addr\> where
+    Return or sets the speed of loco with address <addr> where
     - speed 0 is stop
     - speed 1 is emergency stop and
     - speed 2 - 127 are the 126 speed steps supported by DCC.
@@ -113,39 +109,39 @@ The protocol is not strictly command->reply based as the command station might s
    ***
 #### lf \<addr\> \<no\> [t|f|~]
 
-    Returns or sets the function \<no\> of loco with address c where
+    Returns or sets the function <no> of loco with address <addr> where
     - t sets the funtion on
     - f sets the function off and
     - ~ toggles the function.
 
    ***
-#### lcvbyte \<addr\> \<idx\> \<cv\>
+#### lcvbyte \<addr\> \<idx\> 0..255>
 
-    Sets the byte value of the CV variable \<idx\> of loco with address \<addr\> to \<cv\>.
+    Sets the byte value of the CV variable <idx> of loco with address <addr>.
 
    ***
-#### lcvbit \<addr\> \<idx\> \<bit\> t|f
+#### lcvbit \<addr\> \<idx\> 0..7 t|f
 
-    Sets the bit \<bit\> of the CV variable \<idx\> of loco with address \<addr\> where
+    Sets the bit 0..7 of the CV variable <idx> of loco with address <addr> where
     - t is on and
     - f is off.
 
    ***
 #### lcv29bit5 \<addr\> t|f
 
-    Sets the bit 5 of CV 29 of loco with address \<addr\> where
+    Sets the bit 5 of CV 29 of loco with address <addr> where
     - t is on and
     - f is off.
 
    ***
 #### lladdr \<addr\> \<laddr\>
 
-    Sets the long address \<laddr\> of loco with address \<addr\>.
+    Sets the long address <laddr> of loco with address <addr>.
 
    ***
 #### lcv1718 \<addr\>
 
-    Returns the value ov CV 17 and CV 18 of loco with address \<addr\>.
+    Returns the value ov CV 17 and CV 18 of loco with address <addr>.
 
    ***
 #### af \<addr\> 0|1 t|f
@@ -188,31 +184,46 @@ The protocol is not strictly command->reply based as the command station might s
     - 4: pico temperature sensor
 
    ***
-#### iocmdb \<cmd\> \<gpio\> [t|f|~]
+#### ioval \<gpio\> [t|f|~]
 
-    Experimental!
+    Returns or sets the gpio value where
+    - t is on and
+    - f is off and
+    - ~ toggles the value
 
-    Executes a boolean GPIO command and returns the boolean value with cmd
-    - 0: get GPIO value
-    - 1: put GPIO value
-        t drives the GPIO high
-        f drives the GPIO low
-        ~ toggles the GPIO value
-    - 2: get GPIO direction
-    - 3: set GPIO direction (t is out and f is in)
-        t sets the direction to out
-        f sets the direction to in
-        ~ toggles the direction
-    - 4: get GPIO pull up state
-    - 5: set GPIO pull up
-        t enabled pull up
-        f disables pull up
-        ~ toggles pull up
-    - 6: get GPIO pull down state
-    - 7: set GPIO pull down
-        t enabled pull down
-        f disables pull down
-        ~ toggles pull down
+    Allowed GPIO values are
+    - 6..15, 20 and 21 
+
+   ***
+#### iodir \<gpio\> [t|f|~]
+
+    Returns or sets the gpio direction where
+    - t is out and
+    - f is in and
+    - ~ toggles the direction
+
+    Allowed GPIO values are
+    - 6..15, 20 and 21 
+
+   ***
+#### ioup \<gpio\> [t|f|~]
+
+    Returns or sets the gpio pull-up where
+    - t is on and
+    - f is off and
+    - ~ toggles the pull-up
+
+    Allowed GPIO values are
+    - 6..15, 20 and 21 
+
+   ***
+#### iodown \<gpio\> [t|f|~]
+
+    Returns or sets the gpio pull-down where
+    - t is on and
+    - f is off and
+    - ~ toggles the pull-down
+
     Allowed GPIO values are
     - 6..15, 20 and 21 
 

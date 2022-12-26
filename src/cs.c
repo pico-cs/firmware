@@ -7,11 +7,11 @@
 #include "io.h"
 #include "rbuf.h"
 #include "cmd.h"
-#include "exe.h"
+#include "mt.h"
 #include "channel.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.5.2"
+#define PROGRAM_VERSION     "v0.6.0"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
@@ -19,15 +19,16 @@
     shared variables between cores
 */
 rbuf_t rbuf;         // refresh buffer
-channel_t channel;   // multicore channel
+cfgch_t cfgch;       // config  channel (multicore)
+cmdch_t cmdch;       // command channel (multicore)
 
 void core1_main() {
-    exe_t exe;
-    exe_init(&exe, &rbuf, &channel);
+    mt_t mt;
+    mt_init(&mt, &rbuf, &cfgch, &cmdch);
 
     multicore_fifo_push_blocking(0); // signal core0 that core1 is started
         
-    exe_dispatch(&exe);
+    mt_dispatch(&mt);
     
     // TODO wait for end
 }
@@ -56,17 +57,19 @@ int main() {
         return -1;
     }
 
-    channel_init(&channel);
-    rbuf_init(&rbuf, &channel);
+    cfgch_init(&cfgch);
+    cmdch_init(&cmdch);
+    
+    rbuf_init(&rbuf, &cmdch);
         
     cmd_t cmd;
-    cmd_init(&cmd, &board, &rbuf, &channel);
+    cmd_init(&cmd, &board, &rbuf, &cfgch, &cmdch);
         
     multicore_launch_core1(core1_main);
     multicore_fifo_pop_blocking(); // wait for core1 to be started
     
     // after bootstrap set board led to right value. 
-    bool enabled = channel_get_enabled(&channel);
+    bool enabled = cfgch_get_enabled(&cfgch);
     board_set_led(&board, enabled);
     
     loop(&cmd, &usb_reader, &usb_writer);

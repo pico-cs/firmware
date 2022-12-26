@@ -13,8 +13,7 @@ typedef struct {
     word bitfield;
     byte cap; //TODO int?
     PIO pio;
-    uint sm; 
-    uint sync_bits;
+    uint sm;
 } dcc_t;
 
 // public interface
@@ -30,30 +29,28 @@ bool dcc_check_acc_out(byte out);
 bool dcc_check_acc_time(byte time);
 
 void dcc_init(dcc_t *dcc, putter fct, PIO pio, uint sm);
-uint dcc_set_sync_bits(dcc_t *dcc, uint sync_bits);
-uint dcc_get_sync_bits(dcc_t *dcc);
-void dcc_reset(dcc_t *dcc);
-void dcc_idle(dcc_t *dcc);
-void dcc_refresh3(dcc_t *dcc, byte msb, byte lsb, byte dir_speed, byte f0_7);
-void dcc_refresh4(dcc_t *dcc, byte msb, byte lsb, byte dir_speed, byte f0_7, byte f8_15);
-void dcc_refresh5(dcc_t *dcc, byte msb, byte lsb, byte dir_speed, byte f0_7, byte f8_15, byte f16_23);
-void dcc_refresh6(dcc_t *dcc, byte msb, byte lsb, byte dir_speed, byte f0_7, byte f8_15, byte f16_23, byte f24_31);
-void dcc_dir_speed(dcc_t *dcc, byte msb, byte lsb, byte dir_speed);
-void dcc_f0_4(dcc_t *dcc, byte msb, byte lsb, byte f0_4);
-void dcc_f5_8(dcc_t *dcc, byte msb, byte lsb, byte f5_8);
-void dcc_f9_12(dcc_t *dcc, byte msb, byte lsb, byte f9_12);
-void dcc_f13_20(dcc_t *dcc, byte msb, byte lsb, byte f13_20);
-void dcc_f21_28(dcc_t *dcc, byte msb, byte lsb, byte f21_28);
-void dcc_f29_36(dcc_t *dcc, byte msb, byte lsb, byte f29_36);
-void dcc_f37_44(dcc_t *dcc, byte msb, byte lsb, byte f37_44);
-void dcc_f45_52(dcc_t *dcc, byte msb, byte lsb, byte f45_52);
-void dcc_f53_60(dcc_t *dcc, byte msb, byte lsb, byte f53_60);
-void dcc_f61_68(dcc_t *dcc, byte msb, byte lsb, byte f61_68);
-void dcc_cv_byte(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte val);
-void dcc_cv_bit(dcc_t *dcc, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv_bit, bool cv_flag);
-void dcc_cv29_bit5(dcc_t *dcc, byte msb, byte lsb, bool cv29_bit5);
-void dcc_laddr(dcc_t *dcc, byte msb, byte lsb, byte new_msb, byte new_lsb);
-void dcc_acc(dcc_t *dcc, byte msb, byte lsb, byte acc_out, bool acc_flag);
-void dcc_acc_ext(dcc_t *dcc, byte msb, byte lsb, byte acc_status);
+void dcc_reset(dcc_t *dcc, byte num_sync_bit);
+void dcc_idle(dcc_t *dcc, byte num_sync_bit);
+void dcc_refresh3(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte dir_speed, byte f0_7);
+void dcc_refresh4(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte dir_speed, byte f0_7, byte f8_15);
+void dcc_refresh5(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte dir_speed, byte f0_7, byte f8_15, byte f16_23);
+void dcc_refresh6(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte dir_speed, byte f0_7, byte f8_15, byte f16_23, byte f24_31);
+void dcc_dir_speed(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte dir_speed);
+void dcc_f0_4(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f0_4);
+void dcc_f5_8(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f5_8);
+void dcc_f9_12(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f9_12);
+void dcc_f13_20(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f13_20);
+void dcc_f21_28(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f21_28);
+void dcc_f29_36(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f29_36);
+void dcc_f37_44(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f37_44);
+void dcc_f45_52(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f45_52);
+void dcc_f53_60(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f53_60);
+void dcc_f61_68(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte f61_68);
+void dcc_cv_byte(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte val);
+void dcc_cv_bit(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte cv_msb, byte cv_lsb, byte cv_bit, bool cv_flag);
+void dcc_cv29_bit5(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, bool cv29_bit5);
+void dcc_laddr(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte new_msb, byte new_lsb);
+void dcc_acc(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte acc_out, bool acc_flag);
+void dcc_acc_ext(dcc_t *dcc, byte num_sync_bit, byte msb, byte lsb, byte acc_status);
 
 #endif

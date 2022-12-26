@@ -1,36 +1,12 @@
 #include <stdio.h>
+#include "pico/binary_info.h"
 
 #include "rbuf.h"
-#include "exe.h"
 
 enum {
     RBUF_ERROR_NONE        =  0,
     RBUF_ERROR_NOT_FOUND   = -1,
     RBUF_ERROR_BUFFER_FULL = -2,
-};
-
-// some decoders cannot handle extended function formats, so
-// - the default is set to restrict the refresh cycle to functions 0-12
-// - if a function > 12 is selected, the refresh cycle is extended
-enum {
-    NUM_REFRESH_CYCLE_F0_12   =  4, // dir_speed, f0_4, f5_8, f9_12
-    NUM_REFRESH_CYCLE_F13_20  =  5,
-    NUM_REFRESH_CYCLE_F21_28  =  6,
-    NUM_REFRESH_CYCLE_F29_36  =  7,
-    NUM_REFRESH_CYCLE_F37_44  =  8,
-    NUM_REFRESH_CYCLE_F45_52  =  9,
-    NUM_REFRESH_CYCLE_F53_60  = 10,
-    NUM_REFRESH_CYCLE_F61_68  = 11,
-};
-
-static const byte REFRESH_CYCLES[7] = {
-    NUM_REFRESH_CYCLE_F13_20,
-    NUM_REFRESH_CYCLE_F21_28, 
-    NUM_REFRESH_CYCLE_F29_36, 
-    NUM_REFRESH_CYCLE_F37_44, 
-    NUM_REFRESH_CYCLE_F45_52,
-    NUM_REFRESH_CYCLE_F53_60,
-    NUM_REFRESH_CYCLE_F61_68,
 };
 
 static const int TIMEOUT_US = 100; // timeout in micro seconds
@@ -48,8 +24,11 @@ typedef bool (*bool_idx_setter)(rbuf_t*, uint, byte, bool);
 // rbuf_entry
 
 static inline void rbuf_entry_clear_attr(volatile rbuf_entry_t *entry) {
-    entry->num_refresh_cycle = NUM_REFRESH_CYCLE_F0_12;
-    entry->refresh_cycle = 0;
+    // some decoders cannot handle extended function formats, so
+    // - the default is set to restrict the refresh cycle to functions 0-12
+    // - if a function > 12 is selected, the refresh cycle is extended
+    entry->max_refresh_cmd = CMDCH_F9_12;
+    entry->refresh_cmd = CMDCH_DIR_SPEED;
     entry->dir_speed = 0;
     entry->f0_4 = 0;
     entry->f5_68.f5_68 = 0;
@@ -63,22 +42,9 @@ static inline void rbuf_entry_clear(volatile rbuf_entry_t *entry) {
     entry->next = 0;
 }
 
-static inline void rbuf_entry_copy(volatile rbuf_entry_t *dest, const volatile rbuf_entry_t *source) {
-    dest->msb = source->msb;
-    dest->lsb = source->lsb;
-    dest->num_refresh_cycle = source->num_refresh_cycle;
-    dest->refresh_cycle = source->refresh_cycle;
-    dest->dir_speed = source->dir_speed;
-    dest->f0_4 = source->f0_4;
-    dest->f5_68.f5_68 = source->f5_68.f5_68;
-    dest->prev = source->prev;
-    dest->next = source->next;
-}
-
 // rbuf
 
 static inline bool rbuf_try_lock(rbuf_t *rbuf) {
-    //return true;
     return mutex_enter_timeout_us(&rbuf->mu, TIMEOUT_US);
 }
 
@@ -94,14 +60,6 @@ static inline void rbuf_unlock(rbuf_t *rbuf) {
     //printf("exit unlock \n");
 }
 
-static inline void rbuf_clear_entry(rbuf_t *rbuf, uint idx) {
-    rbuf_entry_clear(&rbuf->buf[idx]);
-}
-
-static inline void rbuf_clear_entry_attr(rbuf_t *rbuf, uint idx) {
-    rbuf_entry_clear_attr(&rbuf->buf[idx]);
-}
-
 static inline bool rbuf_get_dir_internal(rbuf_t *rbuf, uint idx) {
     return (rbuf->buf[idx].dir_speed & 0x80) != 0 ? true : false;
 }
@@ -112,7 +70,7 @@ static inline bool rbuf_set_dir_internal(rbuf_t *rbuf, uint idx, bool dir) {
     } 
     byte m = dir ? 0x80 : 0x00;
     rbuf->buf[idx].dir_speed = m | (rbuf->buf[idx].dir_speed & 0x7f);
-    channel_dir_speed(rbuf->channel, rbuf->buf[idx].msb, rbuf->buf[idx].lsb, rbuf->buf[idx].dir_speed);
+    cmdch_dir_speed(rbuf->cmdch, rbuf->buf[idx].msb, rbuf->buf[idx].lsb, rbuf->buf[idx].dir_speed);
     return true;
 }
 
@@ -125,7 +83,7 @@ static inline bool rbuf_set_speed128_internal(rbuf_t *rbuf, uint idx, byte speed
         return false; // not changed
     }
     rbuf->buf[idx].dir_speed = (rbuf->buf[idx].dir_speed & 0x80) | (speed & 0x7f);
-    channel_dir_speed(rbuf->channel, rbuf->buf[idx].msb, rbuf->buf[idx].lsb, rbuf->buf[idx].dir_speed);
+    cmdch_dir_speed(rbuf->cmdch, rbuf->buf[idx].msb, rbuf->buf[idx].lsb, rbuf->buf[idx].dir_speed);
     return true;
 }
 
@@ -140,15 +98,7 @@ static inline bool rbuf_get_fct_internal(rbuf_t *rbuf, uint idx, byte no) {
 }
 
 static inline bool rbuf_set_fct_internal(rbuf_t *rbuf, uint idx, byte no, bool v) {
-    // update num_refresh_cycle
-    if (no >= 13) {
-        byte i = (no - 13) / 8;
-        if (rbuf->buf[idx].num_refresh_cycle < REFRESH_CYCLES[i]) rbuf->buf[idx].num_refresh_cycle = REFRESH_CYCLES[i];
-    }
-        
-    if (rbuf_get_fct_internal(rbuf, idx, no) == v) {
-        return false; // not changed
-    }
+    if (rbuf_get_fct_internal(rbuf, idx, no) == v) return false; // not changed
 
     byte msb = rbuf->buf[idx].msb;
     byte lsb = rbuf->buf[idx].lsb;
@@ -158,13 +108,13 @@ static inline bool rbuf_set_fct_internal(rbuf_t *rbuf, uint idx, byte no, bool v
         byte f0_4 = rbuf->buf[idx].f0_4;
         f0_4 = v ? f0_4 | 0x10 : f0_4 & ~0x10;
         rbuf->buf[idx].f0_4 = f0_4;
-        channel_f0_4(rbuf->channel, msb, lsb, f0_4);
+        cmdch_f0_4(rbuf->cmdch, msb, lsb, f0_4);
     } else if (no < 5) {
         i = no - 1; // zero based
         byte f0_4 = rbuf->buf[idx].f0_4;
         f0_4 = v ? f0_4 | (ONE_U8 << i) : f0_4 & ~(ONE_U8 << i);
         rbuf->buf[idx].f0_4 = f0_4;
-        channel_f0_4(rbuf->channel, msb, lsb, f0_4);
+        cmdch_f0_4(rbuf->cmdch, msb, lsb, f0_4);
     } else {
         i = no - 5; // zero based
         f5_68_t f5_68;
@@ -175,26 +125,26 @@ static inline bool rbuf_set_fct_internal(rbuf_t *rbuf, uint idx, byte no, bool v
         switch (i / 8) {
         case 0:
             if ((i & 8) <= 4) {
-                channel_f5_8(rbuf->channel, msb, lsb, f5_68.f5_8);
+                cmdch_f5_8(rbuf->cmdch, msb, lsb, f5_68.f5_8);
             } else {
-                channel_f9_12(rbuf->channel, msb, lsb, f5_68.f9_12);
+                cmdch_f9_12(rbuf->cmdch, msb, lsb, f5_68.f9_12);
             }
             break;
-        case 1: channel_f13_20(rbuf->channel, msb, lsb, f5_68.f13_20); break;
-        case 2: channel_f21_28(rbuf->channel, msb, lsb, f5_68.f21_28); break;
-        case 3: channel_f29_36(rbuf->channel, msb, lsb, f5_68.f29_36); break;
-        case 4: channel_f37_44(rbuf->channel, msb, lsb, f5_68.f37_44); break;
-        case 5: channel_f45_52(rbuf->channel, msb, lsb, f5_68.f45_52); break;
-        case 6: channel_f53_60(rbuf->channel, msb, lsb, f5_68.f53_60); break;
-        case 7: channel_f61_68(rbuf->channel, msb, lsb, f5_68.f61_68); break;
+        case 1: cmdch_f13_20(rbuf->cmdch, msb, lsb, f5_68.f13_20); rbuf->buf[idx].max_refresh_cmd = CMDCH_F13_20; break;
+        case 2: cmdch_f21_28(rbuf->cmdch, msb, lsb, f5_68.f21_28); rbuf->buf[idx].max_refresh_cmd = CMDCH_F21_28; break;
+        case 3: cmdch_f29_36(rbuf->cmdch, msb, lsb, f5_68.f29_36); rbuf->buf[idx].max_refresh_cmd = CMDCH_F29_36; break;
+        case 4: cmdch_f37_44(rbuf->cmdch, msb, lsb, f5_68.f37_44); rbuf->buf[idx].max_refresh_cmd = CMDCH_F37_44; break;
+        case 5: cmdch_f45_52(rbuf->cmdch, msb, lsb, f5_68.f45_52); rbuf->buf[idx].max_refresh_cmd = CMDCH_F45_52; break;
+        case 6: cmdch_f53_60(rbuf->cmdch, msb, lsb, f5_68.f53_60); rbuf->buf[idx].max_refresh_cmd = CMDCH_F53_60; break;
+        case 7: cmdch_f61_68(rbuf->cmdch, msb, lsb, f5_68.f61_68); rbuf->buf[idx].max_refresh_cmd = CMDCH_F61_68; break;
         }
     }
     return true;
 }
 
 static int rbuf_get_index(rbuf_t *rbuf, uint addr, uint *idx) {
-    for (int i = 0; i < RBUF_NUM_ENTRY; i++) {
-        *idx = (addr+i) % RBUF_NUM_ENTRY;
+    for (uint i = 0; i < RBUF_SIZE; i++) {
+        *idx = (addr+i) % RBUF_SIZE;
         int cmpAddr = ADDR(rbuf->buf[*idx].msb, rbuf->buf[*idx].lsb);
         if (addr == cmpAddr) return RBUF_ERROR_NONE;
         if (cmpAddr == 0) return RBUF_ERROR_NOT_FOUND;
@@ -240,14 +190,14 @@ static void rbuf_replace_loco(rbuf_t *rbuf, uint addr, uint idx, bool clear) {
     //printf("enter replace loco %i ind %i \n", loco, idx);
     rbuf->buf[idx].msb = MSB(addr);
     rbuf->buf[idx].lsb = LSB(addr);
-    if (clear) rbuf_clear_entry_attr(rbuf, idx);
+    if (clear) rbuf_entry_clear_attr(&rbuf->buf[idx]);
 }
 
 static void rbuf_remove_loco(rbuf_t *rbuf, uint idx) {
     int prev = rbuf->buf[idx].prev;
     int next = rbuf->buf[idx].next;
 
-    if (prev == next) { // only one entry
+    if (idx == next) { // only one entry (idx == next && idx == first)
         rbuf->first = -1;
         rbuf->next  = -1;
     } else {
@@ -256,7 +206,7 @@ static void rbuf_remove_loco(rbuf_t *rbuf, uint idx) {
         rbuf->first = next;
         if (idx == rbuf->next) rbuf->next = next;
     }
-    rbuf_clear_entry(rbuf, idx);
+    rbuf_entry_clear(&rbuf->buf[idx]);
 }
 
 static bool rbuf_get_byte(rbuf_t *rbuf, uint addr, byte_getter f, byte *b) {
@@ -344,17 +294,31 @@ static bool rbuf_toggle_idx_bool(rbuf_t *rbuf, uint addr, bool_idx_getter g, boo
     return rv;
 }
 
-void rbuf_init(rbuf_t *rbuf, channel_t *channel) {
-    mutex_init(&(rbuf->mu));
-    rbuf->channel = channel;
+static void rbuf_reset_internal(rbuf_t *rbuf) {
     rbuf->first = -1;
     rbuf->next = -1;
-    for (int i = 0; i < RBUF_NUM_ENTRY; i++) {
+    for (int i = 0; i < RBUF_SIZE; i++) {
         rbuf_entry_clear(&rbuf->buf[i]);
     }
 }
 
-bool rbuf_deregister(rbuf_t *rbuf, uint addr) {
+#define RBUF_TEXT "Refresh buffer size " RBUF_SIZE_STRING
+
+void rbuf_init(rbuf_t *rbuf, cmdch_t *cmdch) {
+    bi_decl(bi_program_feature(RBUF_TEXT));
+
+    mutex_init(&(rbuf->mu));
+    rbuf->cmdch = cmdch;
+    rbuf_reset_internal(rbuf);
+}
+
+void rbuf_reset(rbuf_t *rbuf) {
+    rbuf_lock(rbuf);
+    rbuf_reset_internal(rbuf);
+    rbuf_unlock(rbuf);
+}
+
+bool rbuf_del(rbuf_t *rbuf, uint addr) {
     uint idx;
     if (rbuf_get_index(rbuf, addr, &idx) != RBUF_ERROR_NONE) return false;
     rbuf_lock(rbuf);
@@ -395,7 +359,34 @@ bool rbuf_toggle_fct(rbuf_t *rbuf, uint addr, byte no, bool *fct) {
     return rbuf_toggle_idx_bool(rbuf, addr, rbuf_get_fct_internal, rbuf_set_fct_internal, no, fct);
 }
 
-bool rbuf_try_get_next(rbuf_t *rbuf, rbuf_entry_t *entry) {
+static void rbuf_refresh_dir_speed(rbuf_t *rbuf, byte idx, cmdch_in_t *in) { in->dir_speed = rbuf->buf[idx].dir_speed; }
+static void rbuf_refresh_f0_4(rbuf_t *rbuf, byte idx, cmdch_in_t *in)      { in->f0_4 = rbuf->buf[idx].f0_4; }
+static void rbuf_refresh_f5_8(rbuf_t *rbuf, byte idx, cmdch_in_t *in)      { in->f5_8 = rbuf->buf[idx].f5_68.f5_8; }
+static void rbuf_refresh_f9_12(rbuf_t *rbuf, byte idx, cmdch_in_t *in)     { in->f9_12 = rbuf->buf[idx].f5_68.f9_12; }
+static void rbuf_refresh_f13_20(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f13_20 = rbuf->buf[idx].f5_68.f13_20; }
+static void rbuf_refresh_f21_28(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f21_28 = rbuf->buf[idx].f5_68.f21_28; }
+static void rbuf_refresh_f29_36(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f29_36 = rbuf->buf[idx].f5_68.f29_36; }
+static void rbuf_refresh_f37_44(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f37_44 = rbuf->buf[idx].f5_68.f37_44; }
+static void rbuf_refresh_f45_52(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f45_52 = rbuf->buf[idx].f5_68.f45_52; }
+static void rbuf_refresh_f53_60(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f53_60 = rbuf->buf[idx].f5_68.f53_60; }
+static void rbuf_refresh_f61_68(rbuf_t *rbuf, byte idx, cmdch_in_t *in)    { in->f61_68 = rbuf->buf[idx].f5_68.f61_68; }
+
+typedef void (*rbuf_refresher)(rbuf_t *rbuf, byte idx, cmdch_in_t *in);
+static const rbuf_refresher rbuf_refresh_fn[] = {
+    rbuf_refresh_dir_speed,
+    rbuf_refresh_f0_4,
+    rbuf_refresh_f5_8,
+    rbuf_refresh_f9_12,
+    rbuf_refresh_f13_20,
+    rbuf_refresh_f21_28,
+    rbuf_refresh_f29_36,
+    rbuf_refresh_f37_44,
+    rbuf_refresh_f45_52,
+    rbuf_refresh_f53_60,
+    rbuf_refresh_f61_68,
+};
+
+bool rbuf_refresh(rbuf_t *rbuf, bool *one_entry, cmdch_in_t *in) {
     if (!rbuf_try_lock(rbuf)) return false;
 
     if (rbuf->next == -1) { // empty
@@ -404,8 +395,15 @@ bool rbuf_try_get_next(rbuf_t *rbuf, rbuf_entry_t *entry) {
     }
 
     byte idx = rbuf->next;
-    rbuf_entry_copy(entry, &rbuf->buf[idx]);
-    rbuf->buf[idx].refresh_cycle = (rbuf->buf[idx].refresh_cycle + 1) % rbuf->buf[idx].num_refresh_cycle;
+
+    *one_entry = (rbuf->buf[idx].prev == rbuf->buf[idx].next); // only one entry in buffer
+        
+    in->cmd = rbuf->buf[idx].refresh_cmd;
+    in->msb = rbuf->buf[idx].msb;
+    in->lsb = rbuf->buf[idx].lsb;
+    rbuf_refresh_fn[in->cmd](rbuf, idx, in);
+
+    rbuf->buf[idx].refresh_cmd = (rbuf->buf[idx].refresh_cmd + 1) % (rbuf->buf[idx].max_refresh_cmd + 1);
     rbuf->next = rbuf->buf[idx].next; // progress to next entry
         
     rbuf_unlock(rbuf);
