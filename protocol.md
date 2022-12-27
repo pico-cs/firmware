@@ -242,9 +242,9 @@ Each command needs to be ended with a \<CR\> and each reply message does end wit
     =23.861501
     ```
 
-- enable command station output
+- enable command station main track output
     ```
-    +ce t
+    +mte t
     ```
 
     ```

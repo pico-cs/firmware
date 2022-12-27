@@ -7,8 +7,6 @@
 #include "common.h"
 #include "channel.h"
 
-//#define RBUF_NUM_ENTRY 127  // lines in refresh buffer
-
 typedef union {
     uint64_t f5_68;
     struct {
