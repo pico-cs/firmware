@@ -178,7 +178,7 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 
 ## Features
 
-- Pico firmware implementing DCC comands to control model railway locomotives
+- Pico firmware implementing DCC commands to control model railway locomotives
 - Simple command human readable and debug friendly text protocol
   - which can be used directly via serial terminal programs supporting serial over USB
   - and easily integrated into any programming language or tool supporting serial over USB communication
