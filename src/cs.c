@@ -11,7 +11,7 @@
 #include "channel.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.6.2"
+#define PROGRAM_VERSION     "v0.6.3"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
