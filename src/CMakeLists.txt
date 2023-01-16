@@ -38,6 +38,7 @@ if (PICO_BOARD STREQUAL "pico")
     add_executable(cs
         cs.c
         common.c
+        dcc_tx.c
         prot.c
         board.c
         board_pico.c
@@ -116,6 +117,7 @@ if (PICO_BOARD STREQUAL "pico_w")
     add_executable(cs_w
         cs.c
         common.c
+        dcc_tx.c
         prot.c
         board.c
         board_pico_w.c

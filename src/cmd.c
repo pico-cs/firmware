@@ -174,6 +174,7 @@ static cmd_rc_t cmd_led(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *wri
 static cmd_rc_t cmd_temp(cmd_t *cmd, int num_prm, reader_t *reader, writer_t *writer) {
     if (!cmd_check_num_prm(num_prm, 1, 1)) return CMD_RC_INVNUMPRM;
     float result = io_adc_read(IO_ADC_INPUT_TEMP);
+    
     write_success(writer, "%f", 27 - (result - 0.706) / 0.001721);
     return CMD_RC_OK;
 }

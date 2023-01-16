@@ -32,7 +32,7 @@
 static uint io_gpio_adc = 1 << 26 | 1 << 27 | 1 << 28 | 1 << 29;
 
 static uint io_gpio_avail =
-    1 << 6 | 1 << 7 | 1 << 8 | 1 << 9 | 1 << 10 | 1 << 11 | 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 20 | 1 << 21;
+    1 << 10 | 1 << 11 | 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 16 | 1 << 17 | 1 << 18 | 1 << 19 | 1 << 20 | 1 << 21 | 1 << 22;
 
 // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
 static const float conversion_factor = 3.3f / (1 << 12);

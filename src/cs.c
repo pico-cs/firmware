@@ -7,11 +7,12 @@
 #include "io.h"
 #include "rbuf.h"
 #include "cmd.h"
+#include "dcc_tx.h"
 #include "mt.h"
 #include "channel.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.6.3"
+#define PROGRAM_VERSION     "v0.7.0"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
@@ -23,8 +24,11 @@ cfgch_t cfgch;       // config  channel (multicore)
 cmdch_t cmdch;       // command channel (multicore)
 
 void core1_main() {
+    dcc_tx_pio_t tx_pio;
+    dcc_tx_pio_init(&tx_pio);
+    
     mt_t mt;
-    mt_init(&mt, &rbuf, &cfgch, &cmdch);
+    mt_init(&mt, &tx_pio, &rbuf, &cfgch, &cmdch);
 
     multicore_fifo_push_blocking(0); // signal core0 that core1 is started
         

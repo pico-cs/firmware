@@ -80,16 +80,21 @@ The protocol is not strictly command->reply based as the command station might s
     - f disables the output.
 
    ***
-#### mtcv 0..3 [0..255]
+#### mtcv 0..4 [0..255]
 
     Returns or sets a main track CV variable via index.
 
     Currently the following CV indexes are supported:
-    - 0: number of DCC synchronization bits:          17..32 default: 17
-    - 1: number of DCC decoder command repetition:     1.. 5 default:  1
-    - 2: number of DCC CV command repetitions:         2.. 5 default:  2
-    - 3: number of DCC accessory decoder repetitions:  1.. 5 default:  2.
+    - 0: number of DCC synchronization bits:                           17..32 default: 17
+    - 1: number of DCC decoder command repetition:                      1.. 5 default:  1
+    - 2: number of DCC CV command repetitions:                          2.. 5 default:  2
+    - 3: number of DCC accessory decoder repetitions:                   1.. 5 default:  2
+    - 4: BiDi (generate BiDi cutout on / off):                          0 | 1 default:  0
+    - 5: BiDi (microseconds until power off after end bit):            26..32 default: 26
+    - 6: BiDi (microseconds to power on before start of 5th sync bit): 10..16 default: 12
 
+    All changes take immediate effect except CV4 (BiDi). The CV4 change takes effect when enabling the main track output the next time.
+    
    ***
 #### ld \<addr\> [t|f|~]
 
@@ -192,7 +197,7 @@ The protocol is not strictly command->reply based as the command station might s
     - ~ toggles the value
 
     Allowed GPIO values are
-    - 6..15, 20 and 21 
+    - 10..22 
 
    ***
 #### iodir \<gpio\> [t|f|~]
@@ -203,7 +208,7 @@ The protocol is not strictly command->reply based as the command station might s
     - ~ toggles the direction
 
     Allowed GPIO values are
-    - 6..15, 20 and 21 
+    - 10..22 
 
    ***
 #### ioup \<gpio\> [t|f|~]
@@ -214,7 +219,7 @@ The protocol is not strictly command->reply based as the command station might s
     - ~ toggles the pull-up
 
     Allowed GPIO values are
-    - 6..15, 20 and 21 
+    - 10..22 
 
    ***
 #### iodown \<gpio\> [t|f|~]
@@ -225,7 +230,7 @@ The protocol is not strictly command->reply based as the command station might s
     - ~ toggles the pull-down
 
     Allowed GPIO values are
-    - 6..15, 20 and 21 
+    - 10..22 
 
 ### Examples
 

@@ -112,7 +112,7 @@ File <path to firmware>/firmware/src/pico_build/cs.uf2:
 
 Program Information
  name:          cs
- version:       v0.6.0
+ version:       v0.7.0
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      Refresh buffer size 128
@@ -120,21 +120,22 @@ Program Information
                 UART stdin / stdout
                 USB stdin / stdout
  binary start:  0x10000000
- binary end:    0x1000e358
+ binary end:    0x1000d79c
 
 Fixed Pin Information
  0:   UART0 TX
  1:   UART0 RX
  2:   Main track: DCC signal output
  3:   Main track: DCC signal output (inverted)
- 22:  Main track: DCC signal enabled
+ 4:   Main track: DCC signal power
+ 5:   Main track: DCC signal power  (inverted)
  25:  On-board LED
 
 Build Information
  sdk version:       1.4.0
  pico_board:        pico
  boot2_name:        boot2_w25q080
- build date:        Dec 26 2022
+ build date:        Jan 15 2023
  build attributes:  Release
 ```
 
@@ -145,7 +146,7 @@ File ../../pico-cs/firmware/src/pico_w_build/cs_w.uf2:
 
 Program Information
  name:          cs_w
- version:       v0.6.0
+ version:       v0.7.0
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      WiFi SSID MyWiFiSSID password MyWiFiPassword
@@ -155,20 +156,21 @@ Program Information
                 UART stdin / stdout
                 USB stdin / stdout
  binary start:  0x10000000
- binary end:    0x10055a18
+ binary end:    0x10054e5c
 
 Fixed Pin Information
- 0:   CYW43 LED, UART0 TX
- 1:   UART0 RX
- 2:   Main track: DCC signal output
- 3:   Main track: DCC signal output (inverted)
- 22:  Main track: DCC signal enabled
+ 0:  CYW43 LED, UART0 TX
+ 1:  UART0 RX
+ 2:  Main track: DCC signal output
+ 3:  Main track: DCC signal output (inverted)
+ 4:  Main track: DCC signal power
+ 5:  Main track: DCC signal power  (inverted)
 
 Build Information
  sdk version:       1.4.0
  pico_board:        pico_w
  boot2_name:        boot2_w25q080
- build date:        Dec 26 2022
+ build date:        Jan 15 2023
  build attributes:  Release
 ```
 
