@@ -80,7 +80,7 @@ The protocol is not strictly command->reply based as the command station might s
     - f disables the output.
 
    ***
-#### mtcv 0..4 [0..255]
+#### mtcv 0..6 [0..255]
 
     Returns or sets a main track CV variable via index.
 
