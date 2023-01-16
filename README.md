@@ -57,9 +57,10 @@ cp -X cs_w.uf2 /Volumes/RPI-RP2/
 - Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
 - Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
 - The firmware uses the following Raspberry Pi Pico GPIOs:
-  - GP2:  DCC signal output
-  - GP3:  DCC signal output (inverted)
-  - GP22: DCC signal enabled 
+  - GP2: DCC signal output
+  - GP3: DCC signal output (inverted)
+  - GP4: DCC signal power
+  - GP5: DCC signal power  (inverted)
 
 ## Build
 
@@ -191,4 +192,4 @@ Please see [protocol](protocol.md) for information about the implemented text pr
 
 ## Licensing
 
-Copyright 2021-2022 Stefan Miller and pico-cs contributers. Please see our [LICENSE](LICENSE.md) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/pico-cs/firmware).
+Copyright 2021-2023 Stefan Miller and pico-cs contributers. Please see our [LICENSE](LICENSE.md) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/pico-cs/firmware).
