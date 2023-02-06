@@ -1,11 +1,9 @@
 #ifndef _RBUF_H
 #define _RBUF_H
 
-#include "pico/stdlib.h"
 #include "pico/mutex.h"
 
-#include "common.h"
-#include "channel.h"
+#include "cmdq.h"
 
 typedef union {
     uint64_t f5_68;
@@ -41,13 +39,13 @@ typedef struct {
 
 typedef struct {
     mutex_t mu;
-    cmdch_t *cmdch;
+    cmdq_t *cmdq;
     volatile int first, next;
     volatile rbuf_entry_t buf[RBUF_SIZE]; // RBUF_SIZE set by cmake
 } rbuf_t; // refresh buffer
 
 // public interface
-void rbuf_init(rbuf_t *rbuf, cmdch_t *cmdch);
+void rbuf_init(rbuf_t *rbuf, cmdq_t *cmdq);
 
 void rbuf_reset(rbuf_t *rbuf);
 bool rbuf_del(rbuf_t *rbuf, uint addr);
@@ -63,6 +61,6 @@ bool rbuf_get_fct(rbuf_t *rbuf, uint addr, byte no, bool *fct);
 bool rbuf_set_fct(rbuf_t *rbuf, uint addr, byte no, bool fct);
 bool rbuf_toggle_fct(rbuf_t *rbuf, uint addr, byte no, bool *fct);
 
-bool rbuf_refresh(rbuf_t *rbuf, bool *one_entry, cmdch_in_t *cmdch);
+bool rbuf_refresh(rbuf_t *rbuf, bool *one_entry, cmdq_in_t *cmdq);
 
 #endif

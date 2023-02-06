@@ -53,23 +53,26 @@ bool parse_ternary(char *ptr, ternary_t *v);
 
 // writer
 
-typedef int (*flush_fn)(void *obj, const byte buf[], int size);
+typedef int (*flush_fn_t)(void *obj, const byte buf[], int size);
 
 typedef struct {
     void *flusher;
-    flush_fn flush; 
+    flush_fn_t flush_fn; 
 	byte buf[PROT_BUFFER_SIZE];
 	int pos; // position in buf
 } writer_t;
 
 // public interface
-void writer_init(writer_t *writer, void *flusher, flush_fn flush);
+void writer_init(writer_t *writer, void *flusher, flush_fn_t flush_fn);
 
 int write_event(writer_t *writer, const char text[]);
 int write_eventf(writer_t *writer, const char *format, ...);
 int write_error(writer_t *writer, const char text[]);
 int write_success(writer_t *writer, const char *format, ...);
 int write_multi(writer_t *writer, const char *format, ...);
+int write_multi_start(writer_t *writer);
+int write_multi_end(writer_t *writer);
+int write(writer_t *writer, const char *format, ...);
 int write_eor(writer_t *writer);
 
 #endif

@@ -4,8 +4,6 @@
 
 #include "io.h"
 
-#include "pico/printf.h"
-
 /* GPIOs
 - GPIO0:           reserved: UART0 TX (default)
 - GPIO1:           reserved: UART0 RX (default)

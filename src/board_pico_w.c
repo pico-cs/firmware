@@ -1,6 +1,5 @@
 // board_pico_w: add to executables only in pico_w case
 
-#include <stdio.h>
 #include "pico/binary_info.h"
 #include "pico/cyw43_arch.h"
 
@@ -36,7 +35,7 @@ bool board_init(board_t *board, writer_t *logger) {
 
     while (!connected) {
 
-        write_event(logger, "wifi: connecting...");
+        write_eventf(logger, "wifi: connecting MAC: %s ...", board->mac);
         if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
             write_event(logger, "wifi: failed to connect");
         } else {
@@ -48,8 +47,19 @@ bool board_init(board_t *board, writer_t *logger) {
 }
 
 void board_deinit(board_t *board) {
+    board_set_led(board, false);
     cyw43_arch_deinit();
 }
 
-void board_set_led(board_t *board, bool v) { cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, board->led_enabled && v); }
-bool board_get_led(board_t *board)         { return cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN); }
+void board_set_led(board_t *board, bool v) { 
+    mutex_enter_blocking(&board->mu);
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, v);
+    mutex_exit(&board->mu);
+}
+
+bool board_get_led(board_t *board) {
+    mutex_enter_blocking(&board->mu);
+    bool rv = cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN);
+    mutex_exit(&board->mu);
+    return rv;
+}

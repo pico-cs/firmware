@@ -1,7 +1,6 @@
 #ifndef _IO_H
 #define _IO_H
 
-#include "common.h"
 #include "prot.h"
 
 typedef enum {

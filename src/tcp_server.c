@@ -1,19 +1,10 @@
-#include <string.h>
-#include <stdlib.h>
-
-#include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
-
-#include "lwip/pbuf.h"
-#include "lwip/tcp.h"
 
 #include "tcp_server.h"
 
 #define POLL_TIME_S 5
 
-static err_t tcp_client_close(void *arg) {
-    tcp_server_t *server = (tcp_server_t*)arg;
-    
+static err_t tcp_client_close(tcp_server_t *server) {
     write_event(server->logger, "tcp: client close");
     
     err_t err = ERR_OK;
@@ -31,22 +22,6 @@ static err_t tcp_client_close(void *arg) {
         }
         server->client_pcb = NULL;
     }
-    return err;
-}
-
-static err_t tcp_server_close(void *arg) {
-    tcp_server_t *server = (tcp_server_t*)arg;
-
-    write_event(server->logger, "tcp: server close");
-    
-    err_t err = tcp_client_close(arg);
-    
-    if (server->server_pcb) {
-        tcp_arg(server->server_pcb, NULL);
-        tcp_close(server->server_pcb);
-        server->server_pcb = NULL;
-    }
-    
     return err;
 }
 
@@ -95,7 +70,7 @@ static void tcp_server_err(void *arg, err_t err) {
     tcp_server_t *server = (tcp_server_t*)arg;
     write_eventf(server->logger, "tcp: server error %d", err);
     if (err != ERR_ABRT) {
-        tcp_server_close(arg);
+        tcp_server_close(server);
     }
 }
 
@@ -181,4 +156,17 @@ int tcp_server_write(void *obj, const byte buf[], int size) {
     cyw43_arch_lwip_end();
     // TODO: error or n - return ERR_OK;
     return size;
+}
+
+err_t tcp_server_close(tcp_server_t *server) {
+    err_t err = tcp_client_close(server);
+    write_event(server->logger, "tcp: server close");
+    
+    if (server->server_pcb) {
+        tcp_arg(server->server_pcb, NULL);
+        tcp_close(server->server_pcb);
+        server->server_pcb = NULL;
+    }
+    
+    return err;
 }

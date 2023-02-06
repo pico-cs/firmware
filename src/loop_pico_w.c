@@ -1,8 +1,7 @@
-#include "loop.h"
-
 #include "tcp_server.h"
 #include "pico/cyw43_arch.h"
 
+#include "loop.h"
 #include "io.h"
 
 void loop(cmd_t *cmd, reader_t *usb_reader, writer_t *usb_writer) {
@@ -25,14 +24,14 @@ void loop(cmd_t *cmd, reader_t *usb_reader, writer_t *usb_writer) {
         cyw43_arch_poll();
         
         if (reader_read_frame(&tcp_reader, server.buffer_recv, server.recv_len)) {
-            cmd_dispatch(cmd, &tcp_reader, &tcp_writer);
+            if (!cmd_dispatch(cmd, &tcp_reader, &tcp_writer)) break;
             reader_reset(&tcp_reader);
         }
         
         int n = usb_read(usb_buf, PROT_BUFFER_SIZE, 10);
         
         if (reader_read_frame(usb_reader, usb_buf, n)) {
-            cmd_dispatch(cmd, usb_reader, usb_writer);
+            if (!cmd_dispatch(cmd, usb_reader, usb_writer)) break;
             reader_reset(usb_reader);
         }
 
@@ -44,4 +43,5 @@ void loop(cmd_t *cmd, reader_t *usb_reader, writer_t *usb_writer) {
 
         //sleep_us(100);
     }
+    tcp_server_close(&server);
 }

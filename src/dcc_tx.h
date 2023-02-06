@@ -17,8 +17,6 @@ struct dcc_tx_sm {
 
     word tx_data;               // data word to write to state machine's TX FIFO 
     byte tx_num_free_bit;       // number of free tx_data bits
-
-    byte *cv_ptr;               // pointer to config byte array
 };
 
 typedef struct {
@@ -28,7 +26,7 @@ typedef struct {
 
 void dcc_tx_pio_init(dcc_tx_pio_t *tx_pio);
 
-void dcc_tx_sm_set_enabled(dcc_tx_sm_t *tx_sm, bool enabled, byte cv_ptr[]);
+void dcc_tx_sm_set_enabled(dcc_tx_sm_t *tx_sm, bool enabled);
 
 void dcc_tx_sm_cmd_reset(dcc_tx_sm_t *tx_sm);
 void dcc_tx_sm_cmd_idle(dcc_tx_sm_t *tx_sm);

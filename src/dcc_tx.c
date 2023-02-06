@@ -1,9 +1,10 @@
 #include "pico/binary_info.h"
 #include "hardware/clocks.h"
+
 #include "dcc_tx.pio.h"
 
 #include "dcc_tx.h"
-#include "mt.h"
+#include "cfg.h"
 
 static const word NUM_WORD_BIT = sizeof(word) * 8;
 static const word ONES = 0xffffffff;
@@ -44,7 +45,7 @@ static inline void dcc_tx_sm_flush_bits(dcc_tx_sm_t *tx_sm) {
 }
 
 static inline void dcc_tx_sm_send_def_bytes(dcc_tx_sm_t *tx_sm, byte b[], byte num_byte) {
-    byte num_sync_bit = tx_sm->cv_ptr[MT_CV_NUM_SYNC_BIT];
+    byte num_sync_bit = cfg_get_cv(CFG_MT_NUM_SYNC_BIT);
     dcc_tx_sm_send_bits(tx_sm, ~(ONES << num_sync_bit), num_sync_bit);    // sync bits
     byte cb = 0;                                                          // check byte
     for (byte i = 0; i < num_byte; i++) {
@@ -59,7 +60,7 @@ static inline void dcc_tx_sm_send_bidi_bytes(dcc_tx_sm_t *tx_sm, byte b[], byte 
         state machine generates the first 4 sync bits to support BiDi cutout, so
         we can reduce the number of sync bits by 4
     */
-    byte num_sync_bit = tx_sm->cv_ptr[MT_CV_NUM_SYNC_BIT] - 4;
+    byte num_sync_bit = cfg_get_cv(CFG_MT_NUM_SYNC_BIT) - 4;
     /*
         send number of dcc bits to state machine 'framing' messages
         -  number of sync bits                              - max:          +32 bits
@@ -84,8 +85,8 @@ static inline void dcc_tx_sm_send_bidi_bytes(dcc_tx_sm_t *tx_sm, byte b[], byte 
         |   ts   |       tc      |   te  |
         |26-32us |   416-428us   |10-16us|
     */
-    word cs = tx_sm->cv_ptr[MT_CV_BIDI_TS] - 26;
-    word ce = tx_sm->cv_ptr[MT_CV_BIDI_TE] - 10;
+    word cs = cfg_get_cv(CFG_MT_BIDI_TS) - 26;
+    word ce = cfg_get_cv(CFG_MT_BIDI_TE) - 10;
 
     dcc_tx_sm_send_bits(tx_sm, cs, 3);
     dcc_tx_sm_send_bits(tx_sm, (428 - 3) - (cs + ce), 9);               // 3 instructions used by program
@@ -168,8 +169,7 @@ static void dcc_tx_sm_init(dcc_tx_sm_t *tx_sm, PIO pio, uint sm, uint offset, pi
     pio_sm_init(pio, sm, offset, config);
 }
 
-void dcc_tx_sm_set_enabled(dcc_tx_sm_t *tx_sm, bool enabled, byte cv_ptr[]) {
-    tx_sm->cv_ptr = cv_ptr;
+void dcc_tx_sm_set_enabled(dcc_tx_sm_t *tx_sm, bool enabled) {
     if (enabled) {
         pio_sm_set_enabled(tx_sm->pio, tx_sm->sm, true);            // enable state machine
         uint instr = pio_encode_set(pio_pins, dcc_tx_high);         // 

@@ -49,7 +49,7 @@ To mitigate some of the function setting issues the pico-cs command station is o
 - Connect the Raspberry Pi Pico to your PC via an USB cable
 - [Build](#build) the pico-cs firmware
 - Install firmware (Pico: cs.uf2, Pico W: cs_w.uf2) via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
-- On macOS Ventura copying via drag&drop in Finder is broken - please copy via command line instead:
+- On macOS Ventura copying via drag&drop in Finder was broken but seems to work again with version 13.1 - anyway, copying the file via command line is always an option:
 ```
 cp -X cs.uf2 /Volumes/RPI-RP2/
 cp -X cs_w.uf2 /Volumes/RPI-RP2/
@@ -113,7 +113,7 @@ File <path to firmware>/firmware/src/pico_build/cs.uf2:
 
 Program Information
  name:          cs
- version:       v0.7.0
+ version:       v0.8.0
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      Refresh buffer size 128
@@ -121,7 +121,7 @@ Program Information
                 UART stdin / stdout
                 USB stdin / stdout
  binary start:  0x10000000
- binary end:    0x1000d79c
+ binary end:    0x1000e534
 
 Fixed Pin Information
  0:   UART0 TX
@@ -136,7 +136,7 @@ Build Information
  sdk version:       1.4.0
  pico_board:        pico
  boot2_name:        boot2_w25q080
- build date:        Jan 15 2023
+ build date:        Feb  6 2023
  build attributes:  Release
 ```
 
@@ -147,7 +147,7 @@ File ../../pico-cs/firmware/src/pico_w_build/cs_w.uf2:
 
 Program Information
  name:          cs_w
- version:       v0.7.0
+ version:       v0.8.0
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      WiFi SSID MyWiFiSSID password MyWiFiPassword
@@ -157,7 +157,7 @@ Program Information
                 UART stdin / stdout
                 USB stdin / stdout
  binary start:  0x10000000
- binary end:    0x10054e5c
+ binary end:    0x10055c2c
 
 Fixed Pin Information
  0:  CYW43 LED, UART0 TX
@@ -171,7 +171,7 @@ Build Information
  sdk version:       1.4.0
  pico_board:        pico_w
  boot2_name:        boot2_w25q080
- build date:        Jan 15 2023
+ build date:        Feb  6 2023
  build attributes:  Release
 ```
 

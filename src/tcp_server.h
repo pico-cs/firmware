@@ -1,7 +1,8 @@
 #ifndef _TCP_SERVER_H
 #define _TCP_SERVER_H
 
-#include "common.h"
+#include "lwip/tcp.h"
+
 #include "prot.h"
 
 typedef struct {
@@ -18,5 +19,6 @@ typedef struct {
 void tcp_server_init(tcp_server_t *server, writer_t *logger);
 bool tcp_server_open(tcp_server_t *server);
 int tcp_server_write(void *obj, const byte buf[], int size);
+err_t tcp_server_close(tcp_server_t *server); 
 
 #endif

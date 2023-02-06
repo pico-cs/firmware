@@ -1,6 +1,5 @@
 // board_pico: add to executables only in pico case
 
-#include <stdio.h>
 #include "pico/binary_info.h"
 
 #include "board.h"
@@ -15,12 +14,24 @@ bool board_init(board_t *board, writer_t *logger) {
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
     // enable led during bootstrap
-    gpio_put(PICO_DEFAULT_LED_PIN, true);
-    
+    board_set_led(board, true);
+
     return true;
 }
 
-void board_deinit(board_t *board) {}
+void board_deinit(board_t *board) {
+    board_set_led(board, false);
+}
 
-void board_set_led(board_t *board, bool v) { gpio_put(PICO_DEFAULT_LED_PIN, board->led_enabled && v); }
-bool board_get_led(board_t *board)         { return gpio_get(PICO_DEFAULT_LED_PIN); }
+void board_set_led(board_t *board, bool v) {
+    mutex_enter_blocking(&board->mu);
+    gpio_put(PICO_DEFAULT_LED_PIN, v);
+    mutex_exit(&board->mu);
+}
+
+bool board_get_led(board_t *board) {
+    mutex_enter_blocking(&board->mu);
+    bool rv = gpio_get(PICO_DEFAULT_LED_PIN);
+    mutex_exit(&board->mu);
+    return rv;
+}

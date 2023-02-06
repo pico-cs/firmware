@@ -38,17 +38,20 @@ if (PICO_BOARD STREQUAL "pico")
     add_executable(cs
         cs.c
         common.c
+        core.c
         dcc_tx.c
         prot.c
+        cfg.c
+        flash.c
         board.c
         board_pico.c
         loop_pico.c
         io.c
         cmd.c
+        cmdq.c
         mt.c
         dcc.c
         rbuf.c
-        channel.c
     )
 
     target_compile_definitions(cs PRIVATE
@@ -117,18 +120,21 @@ if (PICO_BOARD STREQUAL "pico_w")
     add_executable(cs_w
         cs.c
         common.c
+        core.c
         dcc_tx.c
         prot.c
+        cfg.c
+        flash.c
         board.c
         board_pico_w.c
         loop_pico_w.c
         tcp_server.c
         io.c
         cmd.c
+        cmdq.c
         mt.c
         dcc.c
         rbuf.c
-        channel.c
     )
 
     target_compile_definitions(cs_w PRIVATE

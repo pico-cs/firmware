@@ -164,7 +164,7 @@ static int writer_flush(writer_t *writer) {
     // TODO error event
     //}
     int size = writer->pos;
-    writer->flush(writer->flusher, writer->buf, size);
+    writer->flush_fn(writer->flusher, writer->buf, size);
     writer->pos = 0;
     return size;
 }
@@ -182,9 +182,9 @@ static void writer_write_string(writer_t *writer, const char *s) {
     }
 }
 
-void writer_init(writer_t *writer, void *flusher, flush_fn flush) {
+void writer_init(writer_t *writer, void *flusher, flush_fn_t flush_fn) {
     writer->flusher = flusher;
-    writer->flush = flush;
+    writer->flush_fn = flush_fn;
     writer->pos = 0;
 }
 
@@ -230,6 +230,24 @@ int write_multi(writer_t *writer, const char *format, ...) {
     va_end(va);
     writer_write_char(writer, prot_char_nl);
     return writer_flush(writer);
+}
+
+int write_multi_start(writer_t *writer) {
+    writer_write_char(writer, prot_tag_multi);
+    //return writer_flush(writer);
+}
+
+int write_multi_end(writer_t *writer) {
+    writer_write_char(writer, prot_char_nl);
+    return writer_flush(writer);
+}
+
+int write(writer_t *writer, const char *format, ...) {
+    va_list va;
+    va_start(va, format);
+    vfctprintf(&write_char, (void *)writer, format, va);
+    va_end(va);
+    //return writer_flush(writer);
 }
 
 int write_eor(writer_t *writer) { 

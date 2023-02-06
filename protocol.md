@@ -29,8 +29,6 @@ The protocol is not strictly command->reply based as the command station might s
    ***
 #### GPIO input event messages
 
-    Experimental!
-
     Event id: ioie
 
     For the free available GPIO inputs an event is raised in case the state of the GPIO has changed. The event returns the GPIO number and the value where 
@@ -61,16 +59,35 @@ The protocol is not strictly command->reply based as the command station might s
     - mac address (pico_w only) 
 
    ***
-#### cl [t|f]
+#### s
     
-    Returns or sets the value for the internal Pico led where
-    - t sets the led on if the command station is enabled
-    - f sets the led off.
+    Stores the command station CV variables persistent on flash memory.
 
    ***
-#### ct
+#### t
 
     Returns the value of the internal temperature sensor.
+
+   ***
+#### cv 0..6 [0..255]
+
+    Returns or sets a command station CV variable via index.
+
+    Currently the following CV indexes are supported:
+
+    - 0: main track configuration flags:                                0..255 default:  1 (led enabled)
+      - Switch led on when main track enabled:                          1
+      - Switch BiDi cutout on for main track:                           2
+      CV value is the sum of all flags to be enabled:
+      e.g. enable Led and BiDi -> CV value: 1 + 2 = 3 
+    - 1: number of DCC synchronization bits:                            17..32 default: 17
+    - 2: number of DCC decoder command repetition:                       1..5  default:  1
+    - 3: number of DCC CV command repetitions:                           2..5  default:  2
+    - 4: number of DCC accessory decoder repetitions:                    1..5  default:  2
+    - 5: BiDi (microseconds until power off after end bit):             26..32 default: 26
+    - 6: BiDi (microseconds to power on before start of 5th sync bit):  10..16 default: 12
+
+    All changes take immediate effect except the BiDi flag. This change takes effect when enabling the main track output the next time.
 
    ***
 #### mte [t|f]
@@ -79,22 +96,6 @@ The protocol is not strictly command->reply based as the command station might s
     - t enables the output and
     - f disables the output.
 
-   ***
-#### mtcv 0..6 [0..255]
-
-    Returns or sets a main track CV variable via index.
-
-    Currently the following CV indexes are supported:
-    - 0: number of DCC synchronization bits:                           17..32 default: 17
-    - 1: number of DCC decoder command repetition:                      1.. 5 default:  1
-    - 2: number of DCC CV command repetitions:                          2.. 5 default:  2
-    - 3: number of DCC accessory decoder repetitions:                   1.. 5 default:  2
-    - 4: BiDi (generate BiDi cutout on / off):                          0 | 1 default:  0
-    - 5: BiDi (microseconds until power off after end bit):            26..32 default: 26
-    - 6: BiDi (microseconds to power on before start of 5th sync bit): 10..16 default: 12
-
-    All changes take immediate effect except CV4 (BiDi). The CV4 change takes effect when enabling the main track output the next time.
-    
    ***
 #### ld \<addr\> [t|f|~]
 
@@ -151,8 +152,6 @@ The protocol is not strictly command->reply based as the command station might s
    ***
 #### af \<addr\> 0|1 t|f
 
-    Experimental!
-
     Sets one of the paired outputs of a simple accessory decoder to active or inactive where
     - addr is the '11-bit' DCC accessory decoder address in the range of 0..4047 with 4044-4047 as NMRA broadcast address
     - 0|1 determines one of the paired outputs and
@@ -160,8 +159,6 @@ The protocol is not strictly command->reply based as the command station might s
 
    ***
 #### at \<addr\> 0|1 0..127
-
-    Experimental!
 
     Sets the activation time for one of the paired outputs of a simple accessory decoder (if supported) where
     - addr is the '11-bit' DCC accessory decoder address in the range of 0..4047 with 4044-4047 as NMRA broadcast address
@@ -172,8 +169,6 @@ The protocol is not strictly command->reply based as the command station might s
 
    ***
 #### as \<addr\> 0...255
-
-    Experimental!
 
     Sets the data byte for an extended accessory decoder like transmitting aspect control to a signal decoder where
     - addr is the '11-bit' DCC accessory decoder address in the range of 0..4047 with 4047 as broadcast address
@@ -240,7 +235,7 @@ Each command needs to be ended with a \<CR\> and each reply message does end wit
 
 - read temperature
     ```
-    +ct
+    +t
     ```
 
     ```

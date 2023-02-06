@@ -9,12 +9,12 @@
 
 ; http://normen.railcommunity.de/RCN-210.pdf
 
-; state machine frequency: 1 000 000 HZ (1us per instruction):
-; ->  58us signal equals  58 instructions
-; -> 100us signal equals 100 instructions
-
 ; default DCC signal
 .program dcc_tx_def
+
+; state machine frequency: 500 000 HZ (2us per instruction):
+; ->  58us signal equals  29 instructions
+; -> 100us signal equals  50 instructions
 
 loop:                               ; 
     set pins dcc_tx_high    [26]    ; set high signal
@@ -29,6 +29,10 @@ long:                               ;
 
 ; DCC signal + BiDi coutout
 .program dcc_tx_bidi
+
+; state machine frequency: 1 000 000 HZ (1us per instruction):
+; ->  58us signal equals  58 instructions
+; -> 100us signal equals 100 instructions
 
 ; high (min 26us) -> cutout (min 416) -> low (10us before 5th sync bit)
     set pins dcc_tx_high            ;             1  (set high signal)
