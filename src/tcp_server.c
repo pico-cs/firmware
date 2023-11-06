@@ -101,10 +101,10 @@ void tcp_server_init(tcp_server_t *server, writer_t *logger) {
     server->port = TCP_PORT;
     server->logger = logger;
     server->recv_len = 0;
+    server->open = false;
 }
 
 bool tcp_server_open(tcp_server_t *server) {
-    server->open = false;
     
     write_eventf(server->logger, "tcp: starting server host %s port %d", ip4addr_ntoa(netif_ip4_addr(netif_list)), server->port);
 
@@ -167,6 +167,6 @@ err_t tcp_server_close(tcp_server_t *server) {
         tcp_close(server->server_pcb);
         server->server_pcb = NULL;
     }
-    
+    server->open = false;
     return err;
 }

@@ -23,15 +23,6 @@ void board_deinit(board_t *board) {
     board_set_led(board, false);
 }
 
-void board_set_led(board_t *board, bool v) {
-    mutex_enter_blocking(&board->mu);
-    gpio_put(PICO_DEFAULT_LED_PIN, v);
-    mutex_exit(&board->mu);
-}
+void board_set_led(board_t *board, bool v) {gpio_put(PICO_DEFAULT_LED_PIN, v);}
 
-bool board_get_led(board_t *board) {
-    mutex_enter_blocking(&board->mu);
-    bool rv = gpio_get(PICO_DEFAULT_LED_PIN);
-    mutex_exit(&board->mu);
-    return rv;
-}
+bool board_get_led(board_t *board) {return gpio_get(PICO_DEFAULT_LED_PIN);}

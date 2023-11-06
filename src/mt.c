@@ -71,29 +71,22 @@ static void mt_refresh_dcc(mt_t *mt, bool one_entry, cmdq_in_t *in) {
 static void mt_set_enabled(mt_t *mt, bool enabled) {
     mt->enabled = enabled;
     if (enabled) { 
-        // switch led on if CV flag is set 
-        if (cfg_get_cv(CFG_MT_CFG)&CFG_MT_CFG_LED) board_set_led(mt->board, true);
-                
         // when switching on set whether def or bidi depending on CV
         if (cfg_get_cv(CFG_MT_CFG)&CFG_MT_CFG_BIDI) {
             mt->tx_sm = &mt->tx_pio->tx_sm_bidi;
         } else {
             mt->tx_sm = &mt->tx_pio->tx_sm_def;
         }
-    } else {
-        // switch led off if CV flag is set 
-        if (cfg_get_cv(CFG_MT_CFG)&CFG_MT_CFG_LED) board_set_led(mt->board, false);
     }
     dcc_tx_sm_set_enabled(mt->tx_sm, enabled);
 }
 
-void mt_init(mt_t *mt, dcc_tx_pio_t *tx_pio, board_t *board, rbuf_t *rbuf, cmdq_t *cmdq) {
+void mt_init(mt_t *mt, dcc_tx_pio_t *tx_pio, rbuf_t *rbuf, cmdq_t *cmdq) {
     mt->enabled = false;  // start not enabled
 
     mt->tx_pio   = tx_pio;
     mt->tx_sm    = &tx_pio->tx_sm_def;
 
-    mt->board = board;
     mt->rbuf  = rbuf;
     mt->cmdq  = cmdq;
 

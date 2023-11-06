@@ -100,6 +100,10 @@ static cmd_rc_t cmd_mt_enabled(cmd_t *cmd, int num_prm, reader_t *reader, writer
         break;
     case 2:
         if (!parse_bool(reader_get_prm(reader, 1), &on)) return CMD_RC_INVPRM;
+
+        // switch led if CV flag is set 
+        if (cfg_get_cv(CFG_MT_CFG)&CFG_MT_CFG_LED) board_set_led(cmd->board, on);
+        
         cfg_set_mt_enabled(on);
         break;
     }

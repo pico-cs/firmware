@@ -2,7 +2,6 @@
 
 // command
 static const int core_num_entry_queue  = 1;
-static const bool core_dummy_data = true; 
 
 void core_init(core_t *core) {
     queue_init(&core->q0, sizeof(bool), core_num_entry_queue);

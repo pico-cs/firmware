@@ -49,12 +49,14 @@ To mitigate some of the function setting issues the pico-cs command station is o
 - Connect the Raspberry Pi Pico to your PC via an USB cable
 - [Build](#build) the pico-cs firmware
 - Install firmware (Pico: cs.uf2, Pico W: cs_w.uf2) via BOOTSEL mode (see [Raspberry Pi Pico documentation](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html))
-- On macOS Ventura copying via drag&drop in Finder was broken but seems to work again with version 13.1 - anyway, copying the file via command line is always an option:
+- On macOS Ventura copying via drag&drop in Finder was broken but seems to work again with version 13.1 - anyway, copying the file via the command line is always an option:
 ```
 cp -X cs.uf2 /Volumes/RPI-RP2/
 cp -X cs_w.uf2 /Volumes/RPI-RP2/
 ``` 
-- Use a terminal emulation tool supporting serial over USB communication like the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software)
+- Use a terminal emulation tool supporting serial over USB communication like
+  - the Serial Monotor of the [Arduino IDE](https://www.arduino.cc/en/software) or
+  - the [Serial Monitor](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-serial-monitor) extension of [Visual Studio Code](https://code.visualstudio.com/)
 - Set the baud rate to 115200 and \<CR\> (Carriage Return) as command / message ending character
 - The firmware uses the following Raspberry Pi Pico GPIOs:
   - GP2: DCC signal output
@@ -113,15 +115,15 @@ File <path to firmware>/firmware/src/pico_build/cs.uf2:
 
 Program Information
  name:          cs
- version:       v0.8.0
+ version:       <firmware version>
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      Refresh buffer size 128
                 double reset -> BOOTSEL
                 UART stdin / stdout
                 USB stdin / stdout
- binary start:  0x10000000
- binary end:    0x1000e534
+ binary start:  <start address>
+ binary end:    <end address>
 
 Fixed Pin Information
  0:   UART0 TX
@@ -133,21 +135,21 @@ Fixed Pin Information
  25:  On-board LED
 
 Build Information
- sdk version:       1.4.0
+ sdk version:       <sdk version>
  pico_board:        pico
  boot2_name:        boot2_w25q080
- build date:        Feb  6 2023
+ build date:        <build date>
  build attributes:  Release
 ```
 
 ```
 ./picotool info -a <path to firmware>/firmware/src/pico_w_build/cs_w.uf2
 
-File ../../pico-cs/firmware/src/pico_w_build/cs_w.uf2:
+File  <path to firmware>/firmware/src/pico_w_build/cs_w.uf2:
 
 Program Information
  name:          cs_w
- version:       v0.8.0
+ version:       <firmware version>
  web site:      https://github.com/pico-cs
  description:   pico-cs DCC command station
  features:      WiFi SSID MyWiFiSSID password MyWiFiPassword
@@ -156,8 +158,8 @@ Program Information
                 double reset -> BOOTSEL
                 UART stdin / stdout
                 USB stdin / stdout
- binary start:  0x10000000
- binary end:    0x10055c2c
+ binary start:  <start address>
+ binary end:    <end address>
 
 Fixed Pin Information
  0:  CYW43 LED, UART0 TX
@@ -168,10 +170,10 @@ Fixed Pin Information
  5:  Main track: DCC signal power  (inverted)
 
 Build Information
- sdk version:       1.4.0
+ sdk version:       <sdk version>
  pico_board:        pico_w
  boot2_name:        boot2_w25q080
- build date:        Feb  6 2023
+ build date:        <build date>
  build attributes:  Release
 ```
 

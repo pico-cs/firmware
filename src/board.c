@@ -16,8 +16,6 @@ static board_type_t board_get_type() {
 }
 
 void board_init_common(board_t *board, writer_t *logger) {
-    mutex_init(&(board->mu));
-
     board->logger = logger;
 
     // unique board id    

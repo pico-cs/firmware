@@ -5,9 +5,10 @@ all:
 	cd src/pico_build; make -j4
 	@echo "build pico_w"
 	mkdir -p src/pico_w_build
-	cd src/pico_w_build; make -j4
+	cd src/pico_w_build; make -
+#see fsfe reuse tool (https://git.fsfe.org/reuse/tool)
 	@echo "reuse (license) check"
-	reuse lint
+	pipx run reuse lint
 
 # rebuild
 rebuild:
@@ -19,13 +20,3 @@ rebuild:
 	rm -rf src/pico_w_build
 	mkdir src/pico_w_build
 	cd src/pico_w_build; cmake .. -DPICO_BOARD=pico_w; make -j4
-
-#install fsfe reuse tool (https://git.fsfe.org/reuse/tool)
-# pre-conditions:
-# - Python 3.6+
-# - pip
-# install pre-conditions in Debian like linux distros:
-# - sudo apt install python3
-# - sudo apt install python3-pip
-reuse:
-	pip3 install --user --upgrade reuse

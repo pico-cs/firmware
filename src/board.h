@@ -1,7 +1,6 @@
 #ifndef _BOARD_H
 #define _BOARD_H
 
-#include "pico/mutex.h"
 #include "pico/unique_id.h"
 
 #include "common.h"
@@ -15,7 +14,6 @@ typedef enum {
 #define MAC_SIZE_BYTES 6
 
 typedef struct {
-    mutex_t mu;
     writer_t *logger;
     board_type_t type;
     char id[PICO_UNIQUE_BOARD_ID_SIZE_BYTES*3];

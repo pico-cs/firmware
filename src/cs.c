@@ -10,26 +10,26 @@
 #include "mt.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.8.0"
+#define PROGRAM_VERSION     "v0.8.1"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
 /*
     shared variables between cores
 */
-core_t  core;           // core (inter core communication)
-board_t board;          // board (shared for led)
-rbuf_t  rbuf;           // refresh buffer
-cmdq_t  cmdq;           // command queue (multicore)
-mt_t    mt;             // main track
+core_t core;        // core (inter core communication)
+rbuf_t rbuf;        // refresh buffer
+cmdq_t cmdq;        // command queue (multicore)
 
 void core1_main() {
     multicore_lockout_victim_init();    // prepare lockout (suspend) of core 1
 
+    mt_t mt; // main track
+
     dcc_tx_pio_t tx_pio;
     dcc_tx_pio_init(&tx_pio);
     
-    mt_init(&mt, &tx_pio, &board, &rbuf, &cmdq);
+    mt_init(&mt, &tx_pio, &rbuf, &cmdq);
 
     core_signal_start1(&core);          // signal core0 that core1 is started
 
@@ -39,9 +39,9 @@ void core1_main() {
     }
 }
 
-static const uint32_t wait_ms = 200;
-
 int main() {
+
+    board_t board;
 
     bi_decl(bi_program_version_string(PROGRAM_VERSION));
     bi_decl(bi_program_description(PROGRAM_DESCRIPTION));
@@ -84,8 +84,8 @@ int main() {
     loop(&cmd, &usb_reader, &usb_writer); // finally loop until reboot
 
     // reboot
-    core_wait_stop1(&core);     // wait for core1 to be stopped
+    core_wait_stop1(&core);             // wait for core1 to be stopped
     board_deinit(&board);
-    sleep_ms(wait_ms);          // wait for write output
-    watchdog_enable(0, true);   // reboot immediately
+    uart_default_tx_wait_blocking();    // wait for write output
+    watchdog_enable(0, true);           // reboot immediately
 }
