@@ -38,7 +38,7 @@ Voltage levels:
 
 Please be aware that not all DCC decoders do support all of the DCC commands. The pico-cs command station is using the DCC commands which most standard compliant DCC decoders should be able to understand. Nonetheless some decoders 
 - do have issues with main track programming
-- do behave wierd in case functions are used not supported by the decoder or writing CVs in general
+- do behave weird in case functions are used not supported by the decoder or writing CVs in general
 
 **Please be cautious and test all loco decoders on a roller test stand before using on track.**
 

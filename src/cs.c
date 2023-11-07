@@ -10,7 +10,7 @@
 #include "mt.h"
 #include "loop.h"
 
-#define PROGRAM_VERSION     "v0.8.1"
+#define PROGRAM_VERSION     "v0.8.2"
 #define PROGRAM_DESCRIPTION "pico-cs DCC command station"
 #define PROGRAM_URL         "https://github.com/pico-cs"
 
